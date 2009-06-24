@@ -1,0 +1,23 @@
+Source: libbpp-raa
+Section: libs
+Priority: optional
+Maintainer: Julien Dutheil <jdutheil@birc.au.dk>
+Build-Depends: debhelper (>= 5), autotools-dev
+Standards-Version: 3.7.2
+
+Package: libbpp-raa-dev
+Section: libdevel
+Architecture: any
+Depends: libbpp-raa (= ${source:Version}), libbpp-utils-dev (= 1.4.0), libbpp-numcalc-dev (= 1.7.0), libbpp-seq-dev (= 1.6.0)
+Description: The Bio++ Remote Acnuc Access library development files.
+ This library contains utilitary and classes to query public database GenBank, EMBL, SwissProt, etc) using acnuc.
+ It is part of the Bio++ project.
+
+Package: libbpp-raa
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libbpp-utils (= 1.4.0), libbpp-numcalc (= 1.7.0), libbpp-seq (= 1.6.0)
+Description: The Bio++ Remote Acnuc Access library.
+ This library contains utilitary and classes to query public database GenBank, EMBL, SwissProt, etc) using acnuc.
+ It is part of the Bio++ project.
+
