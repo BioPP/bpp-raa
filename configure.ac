@@ -34,6 +34,7 @@ AC_CONFIG_SRCDIR(Bpp/Raa/RAA.h)
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE()
 AC_LANG_CPLUSPLUS
+AC_CHECK_LIB(z,           main, , [AC_MSG_ERROR([Library zlib not found.])])
 AC_CHECK_LIB(bpp-utils,   main, , [AC_MSG_ERROR([Library bpp-utils not found.])])
 AC_CHECK_LIB(bpp-numcalc, main, , [AC_MSG_ERROR([Library bpp-numcalc not found.])])
 AC_CHECK_LIB(bpp-seq,     main, , [AC_MSG_ERROR([Library bpp-seq not found.])])
