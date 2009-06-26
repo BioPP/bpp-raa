@@ -1,6 +1,7 @@
 
-#include "RAA.h"
+#include <Bpp/Raa/RAA.h>
 
+using namespace std;
 using namespace bpp;
 
 RaaList::RaaList()

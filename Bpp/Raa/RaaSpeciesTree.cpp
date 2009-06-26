@@ -1,6 +1,7 @@
 
-#include "RaaSpeciesTree.h"
-
+#include <Bpp/Raa/RaaSpeciesTree.h>
+#include <string>
+using namespace std;
 using namespace bpp;
 
 string RaaSpeciesTree::getName(int rank)

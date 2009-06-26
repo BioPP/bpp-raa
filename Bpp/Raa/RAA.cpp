@@ -5,10 +5,11 @@
  */
 
 
-#include "RAA.h"
+#include <Bpp/Raa/RAA.h>
 
 extern "C" int get_ncbi_gc_number(int gc);
 
+using namespace std;
 using namespace bpp;
 
 RAA::RAA(const string &dbname, int port, const string &server) throw (int)
@@ -98,14 +99,16 @@ int RAA::getSeqFrag(const string &seqname, int first, int length, string &sequen
 RaaSeqAttributes *RAA::getAttributes(const string &name_or_accno)
 {
 	char *description, *species, *access;
+	int acnuc_gc;
 	RaaSeqAttributes *myattr = new RaaSeqAttributes();
 	char *name = raa_getattributes(this->raa_data, name_or_accno.c_str(), &myattr->rank, &myattr->length, 
-						&myattr->frame, &myattr->gc, &access, &description, &species, NULL);
+						&myattr->frame, &acnuc_gc, &access, &description, &species, NULL);
 	myattr->raa = this;
 	myattr->name = name;
 	myattr->description = description;
 	myattr->accno = access;
 	myattr->species = species;
+	myattr->ncbi_gc = get_ncbi_gc_number(acnuc_gc);
 	return myattr;
 }
 
@@ -113,9 +116,10 @@ RaaSeqAttributes *RAA::getAttributes(const string &name_or_accno)
 RaaSeqAttributes *RAA::getAttributes(int seqrank)
 {
 	char *description, *species, *access;
+	int acnuc_gc;
 	RaaSeqAttributes *myattr = new RaaSeqAttributes();
 	char *name = raa_seqrank_attributes(this->raa_data, seqrank, &myattr->length, 
-								   &myattr->frame, &myattr->gc, &access, &description, &species, NULL);
+								   &myattr->frame, &acnuc_gc, &access, &description, &species, NULL);
 	if(name == NULL) return NULL;
 	myattr->rank =seqrank;
 	myattr->raa = this;
@@ -123,6 +127,7 @@ RaaSeqAttributes *RAA::getAttributes(int seqrank)
 	myattr->description = description;
 	myattr->accno = access;
 	myattr->species = species;
+	myattr->ncbi_gc = get_ncbi_gc_number(acnuc_gc);
 	return myattr;
 }
 
@@ -238,14 +243,6 @@ Sequence *RAA::translateCDS(const string &name) throw(BadCharException)
 char RAA::translateInitCodon(int seqrank)
 {
 	return raa_translate_init_codon(raa_data, seqrank);
-}
-
-
-int RAA::getGeneticCode(int seqrank)
-{
-	int acnuc_gc;
-	raa_readsub(raa_data, seqrank, NULL, NULL, NULL, NULL, NULL, NULL, &acnuc_gc);
-	return get_ncbi_gc_number(acnuc_gc);
 }
 
 

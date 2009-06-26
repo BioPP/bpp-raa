@@ -5,17 +5,16 @@
 #define _RAA_H_
 
 extern "C" {
-#include "RAA_acnuc.h"
-}
+#include <Bpp/Raa/RAA_acnuc.h>
+	}
 
 #include <string>
-using namespace std;
 #include <Seq/Sequence.h>
 #include <Seq/alphabets>
 
-#include "RaaList.h"
-#include "RaaSpeciesTree.h"
-#include "RaaSeqAttributes.h"
+#include <Bpp/Raa/RaaList.h>
+#include <Bpp/Raa/RaaSpeciesTree.h>
+#include <Bpp/Raa/RaaSeqAttributes.h>
 
 namespace bpp
 {
@@ -43,7 +42,15 @@ public:
 /**
  * @brief Network access to sequence databases (embl, genbank, swissprot, and others).
  *
- * This class provides network access to nucleotide and protein sequence databases.
+ * This class provides network access to several nucleotide and protein sequence databases
+ * structured for multi-criteria retrieval under the ACNUC system as described in
+ * <a href=http://dx.doi.org/10.1016/j.biochi.2007.07.003>Remote access to ACNUC nucleotide 
+ * and protein sequence databases at PBIL</a>.
+ *
+ * The list of available databases is <a href=http://pbil.univ-lyon1.fr/databases/acnuc/banques_raa.php>here</a>.
+ * EMBL and GenBank are daily updated; SwissProt (it is in fact UniProt and includes SwissProt and trEMBL)
+ * is updated at each partial release; EMBLwgs is updated at each full release (that is, quarterly).
+ *
  * Access can be done to single sequences from their name or accession number
  * or to lists of sequences matching a query combining several retrieval criteria.
  * Any fragment of any sequence defined by coordinates or by features table entries
@@ -79,7 +86,7 @@ public:
 	 *               4: database is currently not available for remote connection\n
 	 *               7: not enough memory
 	 */
-	RAA(const string &dbname, int port=5558, const string &server = "pbil.univ-lyon1.fr") throw(int);
+	RAA(const std::string &dbname, int port=5558, const std::string &server = "pbil.univ-lyon1.fr") throw(int);
 
 	/**
 	 * @brief Direct constructor: opens a network connection to a database server, without specifying a database.
@@ -95,7 +102,7 @@ public:
 	 *               2: cannot create connection with server\n
 	 *               7: not enough memory
 	 */
-	RAA(int port=5558, const string &server = "pbil.univ-lyon1.fr") throw(int);
+	RAA(int port=5558, const std::string &server = "pbil.univ-lyon1.fr") throw(int);
 
 	/**
 	 * @brief Destructor: closes both the database access, if any, and the network connection.
@@ -116,7 +123,7 @@ public:
 	 *               6: incorrect password for password-protected database\n
 	 *               7: not enough memory
 	 */
-	int openDatabase(const string &dbname, char *(*getpasswordf)(void *) = NULL, void *p = NULL);
+	int openDatabase(const std::string &dbname, char *(*getpasswordf)(void *) = NULL, void *p = NULL);
 	
 	/**
 	 * @brief Closes a database connection.
@@ -136,7 +143,7 @@ public:
 	 * @param description   Vector of database descriptions. A description can
 	 * begin with "(offline)" to mean the database is currently not available.
 	 */
-	int knownDatabases(vector<string> &name, vector<string> &description);
+	int knownDatabases(vector<std::string> &name, vector<std::string> &description);
 
 	/** @} */
 
@@ -152,7 +159,7 @@ public:
 	 * @param  name_or_accno   A sequence name or accession number. Case is not significant.
 	 * @return  Several attributes (length, species, etc..., see: RaaSeqAttributes) of a sequence.
 	 */
-	RaaSeqAttributes *getAttributes(const string &name_or_accno);
+	RaaSeqAttributes *getAttributes(const std::string &name_or_accno);
 	
 	/**
 	 * @brief Returns several attributes of a sequence from its database rank.
@@ -174,7 +181,7 @@ public:
 	 * @return          The database sequence including a one-line comment, or NULL if name_or_accno 
 	 * does not match any sequence or if the sequence length exceeds maxlength.
 	 */
-	Sequence *getSeq(const string &name_or_accno, int maxlength=100000);
+	Sequence *getSeq(const std::string &name_or_accno, int maxlength=100000);
 	
 	/**
 	 * @brief Returns a sequence identified by its database rank.
@@ -198,7 +205,7 @@ public:
 	 * @param length    The desired numbered of residues (can be larger than what exists in the sequence).
 	 * @param sequence  Filled upon return with requested sequence data.
 	 */
-	int getSeqFrag(int seqrank, int first, int length, string &sequence);
+	int getSeqFrag(int seqrank, int first, int length, std::string &sequence);
 	
 	/**
 	 * @brief Returns any part of a sequence identified by its name.
@@ -209,7 +216,7 @@ public:
 	 * @param length    The desired numbered of residues (can be larger than what exists in the sequence).
 	 * @param sequence  Filled upon return with requested sequence data.
 	 */
-	int getSeqFrag(const string &seqname, int first, int length, string &sequence);
+	int getSeqFrag(const std::string &seqname, int first, int length, std::string &sequence);
 	
 	/**
 	 * @brief Returns the first annotation line of the sequence of given database rank.
@@ -217,7 +224,7 @@ public:
 	 * @param seqrank        Database rank of a sequence.
 	 * @return               The first annotation line of this sequence (in static memory, without terminal \\n).
 	 */
-	string getFirstAnnotLine(int seqrank);
+	std::string getFirstAnnotLine(int seqrank);
 	
 	/**
 	 * @brief Returns the next annotation line after that previously read, or NULL if the end of the
@@ -225,7 +232,7 @@ public:
 	 *
 	 * @return     The next annotation line after that previously read (in static memory, without terminal \\n).
 	 */
-	string getNextAnnotLine();
+	std::string getNextAnnotLine();
 	
 	/**
 	 * @brief Returns information identifying the position of the last read annotation line.
@@ -241,7 +248,7 @@ public:
 	 * typically obtained from a previous call to getCurrentAnnotAddress().
 	 * @return           The annotation line at that position (in static memory, without terminal \\n).
 	 */
-	string getAnnotLineAtAddress(RaaAddress address);
+	std::string getAnnotLineAtAddress(RaaAddress address);
 	
 	/**
 	 * @brief Returns the full protein translation of a protein-coding nucleotide database (sub)sequence.
@@ -267,7 +274,7 @@ public:
 	 * @throw BadCharException In rare cases, the CDS may contain an internal stop codon that raises an 
 	 * exception when translated to protein.
 	 */
-	Sequence *translateCDS(const string &name) throw(BadCharException);
+	Sequence *translateCDS(const std::string &name) throw(BadCharException);
 	
 	/**
 	 * @brief Returns the amino acid translation of the first codon of a protein-coding (sub)sequence.
@@ -278,15 +285,6 @@ public:
 	 * adequate initiation-codon-specific genetic code.
 	 */
 	char translateInitCodon(int seqrank);
-	
-	/**
-	 * @brief Returns the NCBI genetic code number of a protein-coding (sub)sequence.
-	 *
-	 * @param seqrank     The database rank of a protein-coding sequence. It can be either a subsequence
-	 * corresponding to a CDS feature table entry, or a sequence if all of it belongs to the CDS.
-	 * @return            The rank of the sequence's genetic code using NCBI's numbering (1 is universal).
-	 */
-	int getGeneticCode(int seqrank);
 	
 	/** @} */
 
@@ -307,7 +305,7 @@ public:
 	 * @return          The resulting list of matching database elements, or NULL if an error.
 	 * @throw string*    If error, the string is a message describing the error cause.
 	 */
-	RaaList *processQuery(const string &query, const string &listname) throw(string *);
+	RaaList *processQuery(const std::string &query, const std::string &listname) throw(std::string *);
 	
 	/**
 	 * @brief Creates an empty list with specified name.
@@ -319,7 +317,7 @@ public:
 	 * @throw int    3: a list with same name already existed; it is left unchanged.\n
 	 * 4: the server cannot create more lists.
 	 */
-	RaaList *createEmptyList(const string &listname, const string &kind=RaaList::LIST_SEQUENCES) throw(int);
+	RaaList *createEmptyList(const std::string &listname, const std::string &kind=RaaList::LIST_SEQUENCES) throw(int);
 	
 	/** @} */
 	
@@ -336,7 +334,7 @@ public:
 	 * Case is not significant.
 	 * @return   The maximum length of any database keyword.
 	 */
-	int keywordPattern(const string &pattern);
+	int keywordPattern(const std::string &pattern);
 		
 	/**
 	 * @brief    Finds next matching keyword in database.
@@ -344,7 +342,7 @@ public:
 	 * @param matching    Set to the next matching keyword upon return.
 	 * @return    The database rank of the next matching keyword, or 0 if no more matching keyword.
 	 */
-	int nextMatchingKeyword(string &matching);
+	int nextMatchingKeyword(std::string &matching);
 	
 	/**
 	 * @brief Loads the database's full species tree classification.
@@ -364,8 +362,8 @@ protected:
 private:
 	RaaAddress current_address;
 	int current_kw_match;
-	string *kw_pattern;
-	Sequence *getSeq_both(const string &name_or_accno, int rank, int maxlength);
+	std::string *kw_pattern;
+	Sequence *getSeq_both(const std::string &name_or_accno, int rank, int maxlength);
 };
 
 } //end of namespace bpp.

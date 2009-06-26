@@ -2,10 +2,9 @@
 #define _RAASPECIESTREE_H_
 
 extern "C" {
-#include "RAA_acnuc.h"
+#include <Bpp/RAA/RAA_acnuc.h>
 }
 
-using namespace std;
 #include <string>
 
 namespace bpp {
@@ -30,7 +29,7 @@ public:
 	 * major taxon.
 	 * @return The database rank of this taxon, or 0 if no such taxon exists in tree.
 	 */
-	int findNode(const string &taxon, bool allowsynonym = false);
+	int findNode(const std::string &taxon, bool allowsynonym = false);
 	
 	/**
 	 * @brief Returns the database rank of a taxon identified by a TID.
@@ -46,7 +45,7 @@ public:
 	 * @param  rank  The database rank of a taxon.
 	 * @return The name of this taxon.
 	 */
-	string getName(int rank);
+	std::string getName(int rank);
 	
 	/**
 	 * @brief Returns the database rank of the parent of a taxon in the tree.
@@ -80,7 +79,7 @@ public:
 	 * @param  rank  The database rank of a taxon.
 	 * @return The label of this taxon, or "" if no such taxon or label exists in tree. 
 	 */
-	string label(int rank);
+	std::string label(int rank);
 	
 	/**
 	 * @brief Returns the rank of the first child taxon of a given taxon.

@@ -1,7 +1,6 @@
 #ifndef _RAASEQATTRIBUTES_H_
 #define _RAASEQATTRIBUTES_H_
 
-using namespace std;
 #include <string>
 
 namespace bpp
@@ -20,7 +19,7 @@ public:
 	/**
 	 * @brief    Returns the sequence name.
 	 */
-	string getName() {return name; };
+	std::string getName() {return name; };
 	
 	/**
 	 * @brief    Returns the sequence length.
@@ -35,7 +34,7 @@ public:
 	/**
 	 * @brief    Returns the sequence's NCBI genetic code number (1 is universal). Meaningful only for CDS sequences.
 	 */
-	int getGeneticCode() {return gc; };
+	int getGeneticCode() {return ncbi_gc; };
 	
 	/**
 	 * @brief    Returns the sequence reading frame (0, 1, or 2). Meaningful only for CDS sequences.
@@ -45,17 +44,17 @@ public:
 	/**
 	 * @brief    Returns the sequence species name.
 	 */
-	string getSpeciesName() {return species; };
+	std::string getSpeciesName() {return species; };
 	
 	/**
 	 * @brief    Returns the sequence primary accession number.
 	 */
-	string getAccessionNumber() {return accno; };
+	std::string getAccessionNumber() {return accno; };
 	
 	/**
 	 * @brief    Returns a one-line description of the sequence.
 	 */
-	string getDescription() {return description; };
+	std::string getDescription() {return description; };
 protected:
 	
 	/**
@@ -63,14 +62,14 @@ protected:
 	 */
 	RAA *raa;
 private:
-	string name;
+	std::string name;
 	int rank;
 	int length;
-	int gc;
+	int ncbi_gc;
 	int frame;
-	string species;
-	string accno;
-	string description;
+	std::string species;
+	std::string accno;
+	std::string description;
 	};
 	
 }  // namespace bpp
