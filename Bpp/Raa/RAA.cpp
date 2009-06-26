@@ -16,7 +16,7 @@ RAA::RAA(const string &dbname, int port, const string &server) throw (int)
 {
 	kw_pattern = NULL;
 	current_address.div = -1;
-	int error = raa_acnucopen_alt((char *)server.c_str(), port, (char *)dbname.c_str(), "Bio++", &raa_data);
+	int error = raa_acnucopen_alt((char *)server.c_str(), port, (char *)dbname.c_str(), (char *)"Bio++", &raa_data);
 	if(error) {
 		throw error;
 		}
@@ -26,7 +26,7 @@ RAA::RAA(const string &dbname, int port, const string &server) throw (int)
 RAA::RAA(int port, const string &server) throw(int)
 {
 	kw_pattern = NULL;
-	int error = raa_open_socket((char *)server.c_str(), port, "Bio++", &raa_data);
+	int error = raa_open_socket((char *)server.c_str(), port, (char *)"Bio++", &raa_data);
 	if(error) {
 		throw error;
 	}
@@ -157,7 +157,7 @@ int RAA::openDatabase(const string &dbname, char *(*getpasswordf)(void *), void 
 
 void RAA::closeDatabase()
 {
-	sock_fputs(this->raa_data, "acnucclose\n"); 
+	sock_fputs(this->raa_data, (char *)"acnucclose\n"); 
 	read_sock(this->raa_data);
 }
 
@@ -272,9 +272,9 @@ RaaList *RAA::createEmptyList(const string &listname, const string &kind) throw(
 {
 	int err, lrank;
 	char line[100], type, *p, *q;
-	sock_fputs(raa_data, "getemptylist&name=");
+	sock_fputs(raa_data, (char *)"getemptylist&name=");
 	sock_fputs(raa_data, (char *)listname.c_str());
-	sock_fputs(raa_data, "\n");
+	sock_fputs(raa_data, (char *)"\n");
 	char *reponse = read_sock(raa_data);
 	p = strchr(reponse, '=');
 	if(p) q = strchr(p+1, '=');
@@ -333,7 +333,7 @@ static int treeloadprogress(int percent, void *data)
 RaaSpeciesTree *RAA::loadSpeciesTree(bool showprogress)
 {
 	bool init_load_mess = true;
-	int err = raa_loadtaxonomy(raa_data, "ROOT", showprogress ? treeloadprogress : NULL, &init_load_mess, NULL, NULL); 
+	int err = raa_loadtaxonomy(raa_data, (char *)"ROOT", showprogress ? treeloadprogress : NULL, &init_load_mess, NULL, NULL); 
 	if(err) return NULL;
 	if( showprogress && (!init_load_mess) ) cout << "\nSpecies tree download completed\n";
 	RaaSpeciesTree *tree = new RaaSpeciesTree();
