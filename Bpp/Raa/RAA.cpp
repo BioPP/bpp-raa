@@ -5,7 +5,7 @@
  */
 
 
-#include <Bpp/Raa/RAA.h>
+#include "RAA.h"
 
 extern "C" int get_ncbi_gc_number(int gc);
 
@@ -214,10 +214,12 @@ Sequence *RAA::translateCDS(int seqrank) throw(BadCharException)
 		Sprot = new Sequence(*sname, *pstring, &AlphabetTools::PROTEIN_ALPHABET );
 		}
 	catch (BadCharException e){
-		delete sname, pstring;
+		delete sname;
+    delete pstring;
 		throw e;
 		}
-	delete sname, pstring;
+	delete sname;
+  delete pstring;
 	vector<string> comment(1, string(descript) );
 	Sprot->setComments(comment);
 	return Sprot;

@@ -1,5 +1,5 @@
-#include <Bpp/RAA/RAA_acnuc.h>
-#include <Bpp/RAA/parser.h>
+#include "RAA_acnuc.h"
+#include "parser.h"
 
 #include <limits.h>
 #include <unistd.h>

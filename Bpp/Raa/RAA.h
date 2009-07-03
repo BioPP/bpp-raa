@@ -5,16 +5,16 @@
 #define _RAA_H_
 
 extern "C" {
-#include <Bpp/Raa/RAA_acnuc.h>
+#include "RAA_acnuc.h"
 	}
 
 #include <string>
 #include <Seq/Sequence.h>
 #include <Seq/alphabets>
 
-#include <Bpp/Raa/RaaList.h>
-#include <Bpp/Raa/RaaSpeciesTree.h>
-#include <Bpp/Raa/RaaSeqAttributes.h>
+#include "RaaList.h"
+#include "RaaSpeciesTree.h"
+#include "RaaSeqAttributes.h"
 
 namespace bpp
 {

@@ -2,7 +2,7 @@
 #define _RAASPECIESTREE_H_
 
 extern "C" {
-#include <Bpp/RAA/RAA_acnuc.h>
+#include "RAA_acnuc.h"
 }
 
 #include <string>

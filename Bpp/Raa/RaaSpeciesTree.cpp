@@ -1,5 +1,5 @@
 
-#include <Bpp/Raa/RaaSpeciesTree.h>
+#include "RaaSpeciesTree.h"
 #include <string>
 using namespace std;
 using namespace bpp;

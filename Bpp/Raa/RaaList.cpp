@@ -1,5 +1,5 @@
 
-#include <Bpp/Raa/RAA.h>
+#include "RAA.h"
 
 using namespace std;
 using namespace bpp;

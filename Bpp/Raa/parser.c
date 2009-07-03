@@ -1,4 +1,4 @@
-#include <Bpp/RAA/parser.h>
+#include "parser.h"
 
 char *unprotect_quotes(char *name);
 
