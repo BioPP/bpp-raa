@@ -82,17 +82,21 @@ int RAA::getSeqFrag(int seqrank, int first, int length, string &sequence)
 	char *p = (char *)malloc(length + 1);
 	if(p == NULL) return 0;
 	int l = raa_gfrag(this->raa_data, seqrank, first, length, p);
-	if(l > 0) sequence = p;
+	if(l > 0) {
+		majuscules(p);
+		sequence = p;
+		}
 	free(p);
 	return l;
 }
 
 
-int RAA::getSeqFrag(const string &seqname, int first, int length, string &sequence)
+int RAA::getSeqFrag(const string &name_or_accno, int first, int length, string &sequence)
 {
-	int seqrank = raa_isenum(this->raa_data, (char *)seqname.c_str());
+	int seqrank;
+	raa_getattributes(raa_data, name_or_accno.c_str(), &seqrank, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 	if(seqrank == 0) return 0;
-	return this->getSeqFrag(seqrank, first, length, sequence);
+	return getSeqFrag(seqrank, first, length, sequence);
 }
 
 
@@ -345,4 +349,56 @@ RaaSpeciesTree *RAA::loadSpeciesTree(bool showprogress)
 	tree->max_tid = raa_data->max_tid;
 	tree->max_sp = raa_read_first_rec(raa_data, raa_spec); 
 	return tree;
+}
+
+
+vector<string> RAA::listDirectFeatureKeys(void)
+{
+	int total, num;
+	vector<string> ftkeys;
+	
+	total = raa_read_first_rec(raa_data, raa_smj);
+	for(num = 2; num <= total; num++) {
+		char *name = raa_readsmj(raa_data, num, NULL, NULL);
+		if(strncmp(name, "04", 2) != 0) continue;
+		if(strcmp(name, "04ID") == 0) continue;
+		if(strcmp(name, "04LOCUS") == 0) continue;
+		ftkeys.push_back(name + 2);
+	}
+	return ftkeys;
+}
+
+
+RaaList *RAA::getSeqFeature(const string &seqname, const string &featurekey, const string &listname, const string &matching)
+{
+	char query[80];
+	RaaList *list1;
+	int matchinglist, err;
+	sprintf(query, "n=%s and t=%s", seqname.c_str(), featurekey.c_str());
+	string squery = query;
+	try {
+		list1 = processQuery(squery, listname);
+		}
+	catch (string *s) {
+		return NULL;
+		}
+	if(matching.empty() || list1->getCount() == 0) return list1;
+	sprintf(query, "prep_getannots&nl=1\n%s|%s\n", raa_data->embl ? "FT" : "FEATURES", featurekey.c_str());
+	sock_fputs(raa_data, query);
+	char *p = read_sock(raa_data);
+	if(strncmp(p, "code=0", 6) != 0) return NULL;
+	err = raa_modifylist(raa_data, list1->getRank(), (char *)"scan", (char *)matching.c_str(), &matchinglist, NULL, NULL);
+	if(err != 0 || raa_bcount(raa_data, matchinglist) == 0) {
+		delete list1;
+		if(err == 0)  raa_releaselist(raa_data, matchinglist);
+		return NULL;
+		}
+	raa_setlistname(raa_data, matchinglist, (char *)listname.c_str());
+	RaaList *list2 = new RaaList();
+	list2->rank = matchinglist;
+	list2->myraa = this;
+	list2->name = listname;
+	list2->type = &RaaList::LIST_SEQUENCES;
+	delete list1;
+	return list2;
 }
