@@ -122,6 +122,29 @@ public:
 	 * @brief   Gives the list name.
 	 */
 	std::string getName() {return name; };
+	
+	/**
+	 * @brief   Modifies a sequence list by a length criterion.
+	 *
+	 * @param criterion		Length criterion such as "> 1000" or "<5000".
+	 * @param listname		Name to be given to created list of sequences matching the length criterion.
+	 * @return				A new list of sequences matching the length criterion, or NULL if error.
+	 */
+	RaaList *modifyByLength(const std::string &criterion, const std::string &listname);
+	
+	/**
+	 * @brief   Modifies a sequence list by a database insertion date criterion.
+	 *
+	 * The database insertion date of each sequence is that of the last DT record for the embl/swissprot format, 
+	 * or that of the LOCUS record for the GenBank format.
+	 *
+	 * @param criterion		Date criterion such as "> 1/jun/98" or "<10/DEC/2004". Year can be expressed with 2 or 4 digits.
+	 * Case is not significant.
+	 * @param listname		Name to be given to the created list of sequences matching the date criterion.
+	 * @return				A new list of sequences matching the date criterion, or NULL if error.
+	 */
+	RaaList *modifyByDate(const std::string &criterion, const std::string &listname);
+	
 };
 
 } //end of namespace bpp.

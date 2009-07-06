@@ -93,3 +93,33 @@ bool RaaList::isInList(int elt_rank)
 }
 
 
+RaaList *RaaList::modifyByLength(const string &criterion, const string &listname)
+{
+	int err, newlistrank;
+	if(getType() != RaaList::LIST_SEQUENCES) return NULL;
+	err = raa_modifylist(myraa->raa_data, rank, (char *)"length", (char *)criterion.c_str(), &newlistrank, NULL, NULL); 
+	if(err) return NULL;
+	raa_setlistname(myraa->raa_data, newlistrank, (char *)listname.c_str());
+	RaaList *list = new RaaList();
+	list->rank = newlistrank;
+	list->myraa = myraa;
+	list->name = listname;
+	list->type = &RaaList::LIST_SEQUENCES;
+	return list;
+}
+
+
+RaaList *RaaList::modifyByDate(const string &criterion, const string &listname)
+{
+	int err, newlistrank;
+	if(getType() != RaaList::LIST_SEQUENCES) return NULL;
+	err = raa_modifylist(myraa->raa_data, rank, (char *)"date", (char *)criterion.c_str(), &newlistrank, NULL, NULL); 
+	if(err) return NULL;
+	raa_setlistname(myraa->raa_data, newlistrank, (char *)listname.c_str());
+	RaaList *list = new RaaList();
+	list->rank = newlistrank;
+	list->myraa = myraa;
+	list->name = listname;
+	list->type = &RaaList::LIST_SEQUENCES;
+	return list;
+}
