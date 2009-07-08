@@ -393,6 +393,7 @@ public:
 	 * @brief	Successively returns features specified in a previous prepareGetAnyFeature() call.
 	 *
 	 * This function must be called repetitively until it returns NULL or until function interruptGetAnyFeature() is called.
+	 * Features are processed in their order of appearance in the feature table.
 	 * @param opaque	A pointer returned by a previous prepareGetAnyFeature() call.
 	 * @return	A sequence corresponding to one of the features specified in the prepareGetAnyFeature() call, or NULL
 	 * if no more such feature exists.
