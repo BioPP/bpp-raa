@@ -53,7 +53,7 @@ public:
  *
  * Access can be done to single sequences from their name or accession number
  * or to lists of sequences matching a query combining several retrieval criteria.
- * Any fragment of any sequence defined by coordinates or by features table entries
+ * Any fragment of any sequence defined by coordinates or by feature table entries
  * can be retrieved. Access to sequence annotations is possible. Concurrent access 
  * to several databases is possible.
  *
@@ -86,7 +86,7 @@ public:
 	 *               4: database is currently not available for remote connection\n
 	 *               7: not enough memory
 	 */
-	RAA(const std::string &dbname, int port=5558, const std::string &server = "pbil.univ-lyon1.fr") throw(int);
+	RAA(const std::string &dbname, int port = 5558, const std::string &server = "pbil.univ-lyon1.fr") throw(int);
 
 	/**
 	 * @brief Direct constructor: opens a network connection to a database server, without specifying a database.
@@ -303,32 +303,9 @@ public:
 	 * @param listname  A name to be given to the resulting list. Case is not significant. If a list with same 
 	 * name already exists, it is replaced by the new list.
 	 * @return          The resulting list of matching database elements, or NULL if an error.
-	 * @throw string*    If error, the string is a message describing the error cause.
+	 * @throw string    If error, the string is a message describing the error cause.
 	 */
-	RaaList *processQuery(const std::string &query, const std::string &listname) throw(std::string *);
-	
-	/**
-	 * @brief    Computes the list of (sub)sequences of a given sequence corresponding to a given feature key with 
-	 * optional annotation string matching.
-	 *
-	 * This function allows to retrieve all features of the given sequence corresponding to a given feature key
-	 * and whose annotation optionally contains a given string. \n
-	 * Example:\n
-	 * getSeqFeature("AE005174", "tRNA", "mytrnas", "anticodon: TTG")\n
-	 * retrieves all tRNA features present in the feature table of sequence AE005174 that contain the string 
-	 * "anticodon: TTG" in their annotations, and puts that in a sequence list called "mytrnas". This function is
-	 * meaningful with nucleotide sequence databases only (not with protein databases).
-	 *
-	 * @param seqname		The name of a database sequence. Case is not significant.
-	 * @param featurekey	A feature key (e.g., CDS, tRNA, ncRNA) that must be directly accessible, that is, one of those 
-	 * returned by listDirectFeatureKeys(). Case is not significant.
-	 * @param listname		The name to give to the resulting sequence list.
-	 * @param matching		An optional string required to be present in the feature's annotations. Case is not significant.
-	 * @return    The list of subsequences of <i>seqname</i> that correspond to the specified feature key and, optionally, whose
-	 * annotation contains the matching string, or NULL if no matching sequence exists.
-	 */
-	RaaList *getSeqFeature(const std::string &seqname, const std::string &featurekey, const std::string &listname, 
-						   const std::string &matching = "");
+	RaaList *processQuery(const std::string &query, const std::string &listname) throw(std::string);
 
 	/**
 	 * @brief Creates an empty list with specified name.
@@ -343,6 +320,96 @@ public:
 	RaaList *createEmptyList(const std::string &listname, const std::string &kind=RaaList::LIST_SEQUENCES) throw(int);
 	
 	/** @} */
+
+	
+	/**
+	 * @name Access to feature table-defined sequences (nucleotide databases only).
+	 *
+	 * @{
+	 */
+	
+	/**
+	 * @brief    Computes the list of subsequences of a given sequence corresponding to a given feature key with 
+	 * optional annotation string matching.
+	 *
+	 * This function allows to retrieve all features of the given sequence corresponding to a given feature key
+	 * and whose annotation optionally contains a given string. \n
+	 * Example:\n
+	 * getDirectFeature("AE005174", "tRNA", "mytrnas", "anticodon: TTG")\n
+	 * retrieves all tRNA features present in the feature table of sequence AE005174 that contain the string 
+	 * "anticodon: TTG" in their annotations, and puts that in a sequence list called "mytrnas". This function is
+	 * meaningful with nucleotide sequence databases only (not with protein databases).
+	 *
+	 * @param seqname		The name of a database sequence. Case is not significant.
+	 * @param featurekey	A feature key (e.g., CDS, tRNA, ncRNA) that must be directly accessible, that is, one of those 
+	 * returned by listDirectFeatureKeys(). Case is not significant.
+	 * @param listname		The name to give to the resulting sequence list.
+	 * @param matching		An optional string required to be present in the feature's annotations. Case is not significant.
+	 * @return    The list of subsequences of <i>seqname</i> that correspond to the specified feature key and, optionally, whose
+	 * annotation contains the matching string, or NULL if no matching sequence exists.
+	 */
+	RaaList *getDirectFeature(const std::string &seqname, const std::string &featurekey, const std::string &listname, 
+							  const std::string &matching = "");
+	
+	/**
+	 * @brief    Gives all feature keys of the database that can be directly accessed.
+	 *
+	 * These feature keys (e.g., CDS, rRNA, tRNA) can be used with function getDirectFeature(). This function is
+	 * meaningful with nucleotide sequence databases only (not with protein databases).
+	 *
+	 * @return    A string vector listing all feature keys of the database that can be directly accessed.
+	 */
+	vector<std::string> listDirectFeatureKeys();
+	
+	/**
+	 * @brief    Gives all feature keys of the database.
+	 *
+	 * These feature keys (e.g., CDS, conflict, misc_feature) can be used with function prepareGetAnyFeature(). This function is
+	 * meaningful with nucleotide sequence databases only (not with protein databases).
+	 *
+	 * @return    A string vector listing all feature keys of the database.
+	 */
+	vector<std::string> listAllFeatureKeys();
+
+	
+	/**
+	 * @brief	Starts extraction of all features of a specified key present in the feature table of a database sequence.
+	 *
+	 * A database sequence can contain many instances of a given feature key in its feature table. Thus, feature extraction
+	 * is done by first preparing the desired feature extraction, and by then successively extracting features 
+	 * by getNextFeature() calls until no more exist in the feature table or until a call to interruptGetAnyFeature() is done.
+	 * Any successful prepareGetAnyFeature() call must be followed by getNextFeature() calls until
+	 * it returns NULL or by a call to interruptGetAnyFeature(); any call to other RAA member functions in between is prohibited.
+	 *
+	 * @param seqrank	The database rank of a sequence.
+	 * @param featurekey	Any feature key (direct or not) defined in 
+	 * <a href=http://www.ebi.ac.uk/embl/WebFeat/>EMBL/GenBank/DDBJ feature tables</a>. These are also returned by listAllFeatureKeys().
+	 * @return	An opaque pointer to be transmitted to functions getNextFeature() or interruptGetAnyFeature().
+	 * @throw string	A message indicating the cause of the error.
+	 */
+	void *prepareGetAnyFeature(int seqrank, const std::string &featurekey) throw(std::string);
+	
+	/**
+	 * @brief	Successively returns features specified in a previous prepareGetAnyFeature() call.
+	 *
+	 * This function must be called repetitively until it returns NULL or until function interruptGetAnyFeature() is called.
+	 * @param opaque	A pointer returned by a previous prepareGetAnyFeature() call.
+	 * @return	A sequence corresponding to one of the features specified in the prepareGetAnyFeature() call, or NULL
+	 * if no more such feature exists.
+	 */
+	Sequence *getNextFeature(void *opaque);
+	
+	/**
+	 * @brief	Terminates a features extraction session initiated by a prepareGetAnyFeature() call before getNextFeature() call
+	 * returned NULL.
+	 *
+	 * @param opaque	A pointer returned by a previous prepareGetAnyFeature() call.
+	 */
+	void interruptGetAnyFeature(void *opaque);
+
+	/** @} */
+
+	
 	
 	/**
 	 * @name Browsing database species and keywords.
@@ -358,7 +425,7 @@ public:
 	 * @return   The maximum length of any database keyword.
 	 */
 	int keywordPattern(const std::string &pattern);
-		
+	
 	/**
 	 * @brief    Finds next matching keyword in database.
 	 *
@@ -376,28 +443,10 @@ public:
 	 * @return   An object allowing work with the full species tree (see RaaSpeciesTree), or NULL if error.
 	 */
 	RaaSpeciesTree *loadSpeciesTree(bool showprogress=true);
-
-
-	/** @} */
-
 	
-	/**
-	 * @name Miscellaneous.
-	 *
-	 * @{
-	 */
-	
-	/**
-	 * @brief    Gives all feature keys of the database that can be directly accessed.
-	 *
-	 * These feature keys (e.g., CDS, rRNA, tRNA) can be used with function getSeqFeature(). This function is
-	 * meaningful with nucleotide sequence databases only (not with protein databases).
-	 *
-	 * @return    A string vector listing all feature keys of the database that can be directly accessed.
-	 */
-	vector<std::string> listDirectFeatureKeys(void);
 	
 	/** @} */
+
 	
 protected:
 	raa_db_access *raa_data;

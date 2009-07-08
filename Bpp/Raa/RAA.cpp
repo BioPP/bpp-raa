@@ -72,12 +72,14 @@ Sequence *RAA::getSeq(const string &name_or_accno, int maxlength)
 
 Sequence *RAA::getSeq(int seqrank, int maxlength)
 {
+	if(seqrank < 2 || seqrank > raa_data->nseq) return NULL;
 	return getSeq_both(string(""), seqrank, maxlength);
 }
 
 
 int RAA::getSeqFrag(int seqrank, int first, int length, string &sequence)
 {
+	if(seqrank < 2 || seqrank > raa_data->nseq) return 0;
 	sequence = "";
 	char *p = (char *)malloc(length + 1);
 	if(p == NULL) return 0;
@@ -121,6 +123,7 @@ RaaSeqAttributes *RAA::getAttributes(int seqrank)
 {
 	char *description, *species, *access;
 	int acnuc_gc;
+	if(seqrank < 2 || seqrank > raa_data->nseq) return NULL;
 	RaaSeqAttributes *myattr = new RaaSeqAttributes();
 	char *name = raa_seqrank_attributes(this->raa_data, seqrank, &myattr->length, 
 								   &myattr->frame, &acnuc_gc, &access, &description, &species, NULL);
@@ -168,6 +171,7 @@ void RAA::closeDatabase()
 
 string RAA::getFirstAnnotLine(int seqrank)
 {
+	if(seqrank < 2 || seqrank > raa_data->nseq) return "";
 	raa_seq_to_annots(raa_data, seqrank, &current_address.faddr, &current_address.div);
 	char *p = raa_read_annots(raa_data, current_address.faddr, current_address.div);
 	string retval(p);
@@ -205,6 +209,7 @@ string RAA::getAnnotLineAtAddress(RaaAddress address)
 Sequence *RAA::translateCDS(int seqrank) throw(BadCharException)
 {
 	char *descript;
+	if(seqrank < 2 || seqrank > raa_data->nseq) return NULL;
 	char *prot = raa_translate_cds(raa_data, seqrank);
 	if(prot == NULL) return NULL;
 	int l = strlen(prot) - 1;
@@ -248,11 +253,12 @@ Sequence *RAA::translateCDS(const string &name) throw(BadCharException)
 
 char RAA::translateInitCodon(int seqrank)
 {
+	if(seqrank < 2 || seqrank > raa_data->nseq) return 0;
 	return raa_translate_init_codon(raa_data, seqrank);
 }
 
 
-RaaList *RAA::processQuery(const string &query, const string &listname) throw(string *)
+RaaList *RAA::processQuery(const string &query, const string &listname) throw(string)
 {
 	char *message;
 	int type;
@@ -261,7 +267,7 @@ RaaList *RAA::processQuery(const string &query, const string &listname) throw(st
 							 NULL, &type);
 	if(err) {
 		delete mylist;
-		string *errmess = new string(message);
+		string errmess = message;
 		free(message);
 		throw errmess;
 		}
@@ -352,7 +358,7 @@ RaaSpeciesTree *RAA::loadSpeciesTree(bool showprogress)
 }
 
 
-vector<string> RAA::listDirectFeatureKeys(void)
+vector<string> RAA::listDirectFeatureKeys()
 {
 	int total, num;
 	vector<string> ftkeys;
@@ -369,7 +375,36 @@ vector<string> RAA::listDirectFeatureKeys(void)
 }
 
 
-RaaList *RAA::getSeqFeature(const string &seqname, const string &featurekey, const string &listname, const string &matching)
+static void godownkey(raa_db_access *raa_data, unsigned int p3, vector<string>& ftkeys)
+{
+	unsigned next;
+	int value;
+	char *name;
+	
+	next = raa_readshrt(raa_data, p3, &value);
+	name = raa_readkey(raa_data, abs(value), NULL, NULL, NULL, NULL);
+	ftkeys.push_back(name);
+
+	while(next != 0) {
+		next = raa_readshrt(raa_data, next, &value);
+		godownkey(raa_data, value, ftkeys);
+		}
+}
+
+
+vector<string> RAA::listAllFeatureKeys()
+{
+	vector<string> ftkeys;
+	int rank, pdesc;
+	
+	rank = raa_iknum(raa_data, (char *)"misc_feature", raa_key);
+	raa_readkey(raa_data, rank, NULL, NULL, &pdesc, NULL);
+	godownkey(raa_data, pdesc, ftkeys);
+	return ftkeys;
+}
+
+
+RaaList *RAA::getDirectFeature(const string &seqname, const string &featurekey, const string &listname, const string &matching)
 {
 	char query[80];
 	RaaList *list1;
@@ -379,7 +414,7 @@ RaaList *RAA::getSeqFeature(const string &seqname, const string &featurekey, con
 	try {
 		list1 = processQuery(squery, listname);
 		}
-	catch (string *s) {
+	catch (string s) {
 		return NULL;
 		}
 	if(matching.empty() || list1->getCount() == 0) return list1;
@@ -402,3 +437,89 @@ RaaList *RAA::getSeqFeature(const string &seqname, const string &featurekey, con
 	delete list1;
 	return list2;
 }
+
+
+struct extract_data {
+	char line[100];
+};
+
+
+void *RAA::prepareGetAnyFeature(int seqrank, const string &featurekey) throw(string)
+{
+	char  *p, *line, txt[100];
+	int l;
+	
+	if(seqrank < 2 || seqrank > raa_data->nseq) throw "Incorrect first argument";
+	struct extract_data *data = new struct extract_data;
+	sprintf(txt, "extractseqs&seqnum=%d&format=fasta&operation=feature&feature=%s&zlib=F\n", seqrank, featurekey.c_str());
+	sock_fputs(raa_data, txt);
+	line = read_sock(raa_data);
+	if(strcmp(line, "code=0") == 0) {
+		p = read_sock(raa_data);
+		strcpy(data->line, p);
+		return (void *)data;
+	}
+	delete data;
+	p = strstr(line, "message=");
+	if(p == NULL) return NULL;
+	p += 8;
+	if(*p == '"') p++;
+	l = strlen(p);
+	if(p[l-1] == '"') p[l-1] = 0;
+	string message = p;
+	throw message;
+}
+
+
+Sequence *RAA::getNextFeature(void *v)
+{
+	char *p;
+	Sequence *seq;
+	string name;
+	struct extract_data *data = (struct extract_data *)v;
+	
+	while( data->line[0] == 27 /* esc */ ) {
+		p = read_sock(raa_data);
+		strcpy(data->line, p);
+	}
+	if(strcmp(data->line, "extractseqs END.") == 0) {
+		delete data;
+		return NULL;
+	}
+	p = strchr(data->line, ' ');
+	if(p != NULL)*p = 0;
+	name = data->line + 1;
+	p = read_sock(raa_data);
+	string seqdata = "";
+	while( p != NULL && strcmp(p, "extractseqs END.") != 0 && *p != 27 /* esc */  && *p != '>') {
+		seqdata += p;
+		p = read_sock(raa_data);
+	}
+	if(p == NULL) strcpy(data->line, "extractseqs END.");
+	else {
+		if( *p == 27 /* esc */ ) p = read_sock(raa_data);
+		strcpy(data->line, p);
+		}
+	seq = new Sequence(name, seqdata, &AlphabetTools::DNA_ALPHABET);
+	return seq;
+}
+
+
+void RAA::interruptGetAnyFeature(void *v)
+{
+	struct extract_data *data = (struct extract_data *)v;
+	char *p;
+	
+	if(data == NULL) return;
+	sock_fputs(raa_data, (char *)"\033" /* esc */); 
+	sock_flush(raa_data);
+	p = data->line;
+	while( strcmp(p, "extractseqs END.") != 0) {
+		p = read_sock(raa_data);
+		}
+	delete data;
+	/* just to consume ESC that may have arrived after extractseqs END. */
+	sock_fputs(raa_data, (char *)"null_command\n");
+	read_sock(raa_data);
+}
+
