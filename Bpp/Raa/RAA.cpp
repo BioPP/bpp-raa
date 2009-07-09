@@ -7,7 +7,10 @@
 
 #include "RAA.h"
 
-extern "C" int get_ncbi_gc_number(int gc);
+extern "C" {
+	int get_ncbi_gc_number(int gc);
+	int sock_printf(raa_db_access  *raa_current_db, const char *fmt, ...);
+	}
 
 using namespace std;
 using namespace bpp;
@@ -283,10 +286,8 @@ RaaList *RAA::processQuery(const string &query, const string &listname) throw(st
 RaaList *RAA::createEmptyList(const string &listname, const string &kind) throw(int)
 {
 	int err, lrank;
-	char line[100], type, *p, *q;
-	sock_fputs(raa_data, (char *)"getemptylist&name=");
-	sock_fputs(raa_data, (char *)listname.c_str());
-	sock_fputs(raa_data, (char *)"\n");
+	char type, *p, *q;
+	sock_printf(raa_data, (char *)"getemptylist&name=%s\n", listname.c_str() );
 	char *reponse = read_sock(raa_data);
 	p = strchr(reponse, '=');
 	if(p) q = strchr(p+1, '=');
@@ -299,8 +300,7 @@ RaaList *RAA::createEmptyList(const string &listname, const string &kind) throw(
 	if(kind == RaaList::LIST_SEQUENCES) type='S';
 	else if(kind == RaaList::LIST_KEYWORDS) type='K';
 	else type='E';
-	sprintf(line, "setliststate&lrank=%d&type=%c\n", lrank, type);
-	sock_fputs(raa_data, line);
+	sock_printf(raa_data, "setliststate&lrank=%d&type=%c\n", lrank, type);
 	read_sock(raa_data);
 	RaaList *mylist = new RaaList();
 	mylist->myraa = this;
@@ -418,8 +418,7 @@ RaaList *RAA::getDirectFeature(const string &seqname, const string &featurekey, 
 		return NULL;
 		}
 	if(matching.empty() || list1->getCount() == 0) return list1;
-	sprintf(query, "prep_getannots&nl=1\n%s|%s\n", raa_data->embl ? "FT" : "FEATURES", featurekey.c_str());
-	sock_fputs(raa_data, query);
+	sock_printf(raa_data, "prep_getannots&nl=1\n%s|%s\n", raa_data->embl ? "FT" : "FEATURES", featurekey.c_str());
 	char *p = read_sock(raa_data);
 	if(strncmp(p, "code=0", 6) != 0) return NULL;
 	err = raa_modifylist(raa_data, list1->getRank(), (char *)"scan", (char *)matching.c_str(), &matchinglist, NULL, NULL);
@@ -446,13 +445,12 @@ struct extract_data {
 
 void *RAA::prepareGetAnyFeature(int seqrank, const string &featurekey) throw(string)
 {
-	char  *p, *line, txt[100];
+	char  *p, *line;
 	int l;
 	
 	if(seqrank < 2 || seqrank > raa_data->nseq) throw "Incorrect first argument";
 	struct extract_data *data = new struct extract_data;
-	sprintf(txt, "extractseqs&seqnum=%d&format=fasta&operation=feature&feature=%s&zlib=F\n", seqrank, featurekey.c_str());
-	sock_fputs(raa_data, txt);
+	sock_printf(raa_data, "extractseqs&seqnum=%d&format=fasta&operation=feature&feature=%s&zlib=F\n", seqrank, featurekey.c_str());
 	line = read_sock(raa_data);
 	if(strcmp(line, "code=0") == 0) {
 		p = read_sock(raa_data);
