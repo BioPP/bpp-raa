@@ -33,7 +33,7 @@ public:
 	 */
 	int getDiv() {return div; };
 	/**
-	 * @brief Gives, as a long long value, the offset of this annotation line within its database file.
+	 * @brief Gives, as a 64-bit int value, the offset of this annotation line within its database file.
 	 */
 	raa_long getAddr() {return faddr; };
 };
@@ -222,7 +222,7 @@ public:
 	 * @brief Returns the first annotation line of the sequence of given database rank.
 	 *
 	 * @param seqrank        Database rank of a sequence.
-	 * @return               The first annotation line of this sequence (in static memory, without terminal \\n).
+	 * @return               The first annotation line of this sequence (without terminal \\n).
 	 */
 	std::string getFirstAnnotLine(int seqrank);
 	
@@ -230,7 +230,7 @@ public:
 	 * @brief Returns the next annotation line after that previously read, or NULL if the end of the
 	 * database file was reached.
 	 *
-	 * @return     The next annotation line after that previously read (in static memory, without terminal \\n).
+	 * @return     The next annotation line after that previously read (without terminal \\n).
 	 */
 	std::string getNextAnnotLine();
 	
