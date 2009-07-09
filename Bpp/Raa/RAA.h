@@ -199,22 +199,22 @@ public:
 	/**
 	 * @brief Returns any part of a sequence identified by its database rank.
 	 *
-	 * @return          The length of returned sequence data, or 0 if impossible.
 	 * @param seqrank   The database rank of a sequence.
 	 * @param first     The first desired position within the sequence (1 is the smallest valid value).
-	 * @param length    The desired numbered of residues (can be larger than what exists in the sequence).
+	 * @param length    The desired number of residues (can be larger than what exists in the sequence).
 	 * @param sequence  Filled upon return with requested sequence data.
+	 * @return          The length of returned sequence data, or 0 if impossible.
 	 */
 	int getSeqFrag(int seqrank, int first, int length, std::string &sequence);
 	
 	/**
 	 * @brief Returns any part of a sequence identified by its name or accession number.
 	 *
-	 * @return          The length of returned sequence data, or 0 if impossible.
 	 * @param name_or_accno   The name or accession number of a sequence. Case is not significant.
 	 * @param first     The first desired position within the sequence (1 is the smallest valid value).
-	 * @param length    The desired numbered of residues (can be larger than what exists in the sequence).
+	 * @param length    The desired number of residues (can be larger than what exists in the sequence).
 	 * @param sequence  Filled upon return with requested sequence data.
+	 * @return          The length of returned sequence data, or 0 if impossible.
 	 */
 	int getSeqFrag(const std::string &name_or_accno, int first, int length, std::string &sequence);
 	
