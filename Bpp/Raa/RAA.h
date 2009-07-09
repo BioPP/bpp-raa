@@ -302,7 +302,7 @@ public:
 	 * <a href=http://pbil.univ-lyon1.fr/databases/acnuc/cfonctions.html#QUERYLANGUAGE>here</a>.
 	 * @param listname  A name to be given to the resulting list. Case is not significant. If a list with same 
 	 * name already exists, it is replaced by the new list.
-	 * @return          The resulting list of matching database elements, or NULL if an error.
+	 * @return          The resulting list of matching database elements.
 	 * @throw string    If error, the string is a message describing the error cause.
 	 */
 	RaaList *processQuery(const std::string &query, const std::string &listname) throw(std::string);

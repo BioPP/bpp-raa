@@ -261,17 +261,17 @@ char RAA::translateInitCodon(int seqrank)
 RaaList *RAA::processQuery(const string &query, const string &listname) throw(string)
 {
 	char *message;
-	int type;
-	RaaList *mylist = new RaaList();
-	int err = raa_proc_query(raa_data, (char *)query.c_str(), &message, (char *)listname.c_str(), &mylist->rank, NULL, 
+	int type, rank;
+	int err = raa_proc_query(raa_data, (char *)query.c_str(), &message, (char *)listname.c_str(), &rank, NULL, 
 							 NULL, &type);
 	if(err) {
-		delete mylist;
 		string errmess = message;
 		free(message);
 		throw errmess;
 		}
+	RaaList *mylist = new RaaList();
 	mylist->myraa = this;
+	mylist->rank = rank;
 	mylist->name = listname;
 	if(type=='S') mylist->type = &RaaList::LIST_SEQUENCES;
 	else if(type=='K') mylist->type = &RaaList::LIST_KEYWORDS;
