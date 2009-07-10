@@ -21,6 +21,12 @@ namespace bpp {
 class RaaSpeciesTree {
 	friend class RAA;
 public:
+	
+	/**
+	 * @brief Destructor.
+     */
+	~RaaSpeciesTree();
+
 	/**
 	 * @brief Returns the database rank of a taxon identified by its name.
 	 *
