@@ -40,11 +40,6 @@ public:
 	static const std::string LIST_SPECIES;
 	
 	/**
-	 * @brief Destructor. Should not be called after the corresponding RAA object was deleted.
-     */
-	~RaaList();
-	
-	/**
 	 * @brief Gives the number of elements (often sequences) in the list.
 	 */
 	int getCount();

@@ -11,12 +11,6 @@ RaaList::RaaList()
 }
 
 
-RaaList::~RaaList()
-{
-	if(myraa && myraa->raa_data) raa_releaselist(myraa->raa_data, rank);
-}
-
-
 int RaaList::getCount(void)
 {
 	return raa_bcount(myraa->raa_data, rank);

@@ -319,6 +319,14 @@ public:
 	 */
 	RaaList *createEmptyList(const std::string &listname, const std::string &kind=RaaList::LIST_SEQUENCES) throw(int);
 	
+	/**
+	 * @brief Deletes a list and calls its destructor.
+	 *
+	 * @param list	An RaaList object.
+	 */
+	void deleteList(RaaList *list);
+
+	
 	/** @} */
 
 	
@@ -427,6 +435,14 @@ public:
 	 * @return   An object allowing work with the full species tree (see RaaSpeciesTree), or NULL if error.
 	 */
 	RaaSpeciesTree *loadSpeciesTree(bool showprogress=true);
+	
+	/**
+	 * @brief    Frees the memory occupied by the species tree classification.
+	 *
+	 * @param tree    An object previously returned by a loadSpeciesTree() call. It is deleted upon return.
+	 */
+	void freeSpeciesTree(RaaSpeciesTree *tree);
+
 	
 	/**
 	 * @brief    Initializes pattern-matching in database keywords. Matching keywords are then returned by successive nextMatchingKeyword() calls.

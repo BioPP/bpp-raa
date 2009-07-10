@@ -311,6 +311,13 @@ RaaList *RAA::createEmptyList(const string &listname, const string &kind) throw(
 }
 
 
+void RAA::deleteList(RaaList *list)
+{
+	raa_releaselist(raa_data, list->rank);
+	delete list;
+}
+
+
 int RAA::keywordPattern(const string &pattern)
 {
 	current_kw_match = 2;
@@ -355,6 +362,31 @@ RaaSpeciesTree *RAA::loadSpeciesTree(bool showprogress)
 	tree->max_tid = raa_data->max_tid;
 	tree->max_sp = raa_read_first_rec(raa_data, raa_spec); 
 	return tree;
+}
+
+
+void RAA::freeSpeciesTree(RaaSpeciesTree *tree)
+{
+	int i;
+	struct raa_pair *p, *q;
+	for(i = 2; i <= tree->max_sp; i++) {
+		if(raa_data->sp_tree[i] == NULL) continue;
+		free(raa_data->sp_tree[i]->name);
+		if(raa_data->sp_tree[i]->libel != NULL) free(raa_data->sp_tree[i]->libel);
+		if(raa_data->sp_tree[i]->libel_upcase != NULL) free(raa_data->sp_tree[i]->libel_upcase);
+		p = raa_data->sp_tree[i]->list_desc;
+		while(p) {
+			q = p->next;
+			free(p);
+			p = q;
+		}
+		free(raa_data->sp_tree[i]);
+	}
+	if(raa_data->tid_to_rank != NULL) free(raa_data->tid_to_rank);
+	if(raa_data->sp_tree != NULL) free(raa_data->sp_tree);
+	raa_data->sp_tree = NULL;
+	raa_data->tid_to_rank = NULL;
+	delete tree;
 }
 
 

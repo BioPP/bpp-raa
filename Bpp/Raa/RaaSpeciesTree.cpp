@@ -113,27 +113,3 @@ int RaaSpeciesTree::getMajor(int rank)
 	while(sp_tree[rank]->parent == NULL) rank = sp_tree[rank]->syno->rank;
 	return rank;
 }
-
-
-RaaSpeciesTree::~RaaSpeciesTree()
-{
-	int i;
-	struct raa_pair *p, *q;
-	for(i = 2; i <= max_sp; i++) {
-		if(sp_tree[i] == NULL) continue;
-		free(sp_tree[i]->name);
-		if(sp_tree[i]->libel != NULL) free(sp_tree[i]->libel);
-		if(sp_tree[i]->libel_upcase != NULL) free(sp_tree[i]->libel_upcase);
-		p = sp_tree[i]->list_desc;
-		while(p) {
-			q = p->next;
-			free(p);
-			p = q;
-			}
-		free(sp_tree[i]);
-		}
-	free(tid_to_rank);
-	free(sp_tree);
-	raa_data->sp_tree = NULL;
-	raa_data->tid_to_rank = NULL;
-}
