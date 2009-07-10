@@ -21,7 +21,7 @@ namespace bpp
 	
 	
 /**
- * @brief Identifyies an annotation line in a database.
+ * @brief Identifies an annotation line in a database.
  */
 class RaaAddress {
 	friend class RAA;
@@ -417,6 +417,16 @@ public:
 	 *
 	 * @{
 	 */
+	 
+	 /**
+	 * @brief Loads the database's full species tree classification.
+	 *
+	 * This call takes a few seconds to run on large databases because much data get downloaded from the server.
+	 *
+	 * @param showprogress    If true, progress information gets sent to stdout.
+	 * @return   An object allowing work with the full species tree (see RaaSpeciesTree), or NULL if error.
+	 */
+	RaaSpeciesTree *loadSpeciesTree(bool showprogress=true);
 	
 	/**
 	 * @brief    Initializes pattern-matching in database keywords. Matching keywords are then returned by successive nextMatchingKeyword() calls.
@@ -433,18 +443,7 @@ public:
 	 * @param matching    Set to the next matching keyword upon return.
 	 * @return    The database rank of the next matching keyword, or 0 if no more matching keyword.
 	 */
-	int nextMatchingKeyword(std::string &matching);
-	
-	/**
-	 * @brief Loads the database's full species tree classification.
-	 *
-	 * This call takes a few seconds to run on large databases because much data get downloaded from the server.
-	 *
-	 * @param showprogress    If true, progress information gets sent to stdout.
-	 * @return   An object allowing work with the full species tree (see RaaSpeciesTree), or NULL if error.
-	 */
-	RaaSpeciesTree *loadSpeciesTree(bool showprogress=true);
-	
+	int nextMatchingKeyword(std::string &matching);	
 	
 	/** @} */
 

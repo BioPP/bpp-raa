@@ -23,7 +23,7 @@ class RaaSpeciesTree {
 public:
 	
 	/**
-	 * @brief Destructor.
+	 * @brief Destructor. Should not be called after the corresponding RAA object was deleted.
      */
 	~RaaSpeciesTree();
 

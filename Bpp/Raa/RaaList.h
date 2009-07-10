@@ -38,7 +38,10 @@ public:
 	 * @brief Refers to a species list.
 	 */
 	static const std::string LIST_SPECIES;
-	RaaList();
+	
+	/**
+	 * @brief Destructor. Should not be called after the corresponding RAA object was deleted.
+     */
 	~RaaList();
 	
 	/**
@@ -144,7 +147,8 @@ public:
 	 * @return				A new list of sequences matching the date criterion, or NULL if error.
 	 */
 	RaaList *modifyByDate(const std::string &criterion, const std::string &listname);
-	
+private:
+	RaaList();
 };
 
 } //end of namespace bpp.
