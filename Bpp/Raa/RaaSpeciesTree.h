@@ -23,11 +23,6 @@ class RaaSpeciesTree {
 public:
 	
 	/**
-	 * @brief Destructor. Should not be called after the corresponding RAA object was deleted.
-     */
-	~RaaSpeciesTree();
-
-	/**
 	 * @brief Returns the database rank of a taxon identified by its name.
 	 *
 	 * @param  taxon    A taxon name. Case is not significant.
@@ -105,7 +100,7 @@ public:
 	int nextChild(int parent, int child);
 	
 	/**
-	 * @brief Tells whether there is a downward path from taxon parent to taxon child in the species tree .
+	 * @brief Tells whether there is a downward path from taxon parent to taxon child in the species tree.
 	 *
 	 * @param  parent  The database rank of a taxon.
 	 * @param  child  The database rank of another taxon.
