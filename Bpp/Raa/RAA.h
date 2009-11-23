@@ -143,7 +143,7 @@ public:
 	 * @param description   Vector of database descriptions. A description can
 	 * begin with "(offline)" to mean the database is currently not available.
 	 */
-	int knownDatabases(vector<std::string> &name, vector<std::string> &description);
+	int knownDatabases(std::vector<std::string> &name, std::vector<std::string> &description);
 
 	/** @} */
 
@@ -367,7 +367,7 @@ public:
 	 *
 	 * @return    A string vector listing all feature keys of the database that can be directly accessed.
 	 */
-	vector<std::string> listDirectFeatureKeys();
+  std::vector<std::string> listDirectFeatureKeys();
 	
 	/**
 	 * @brief    Gives all feature keys of the database.
@@ -377,7 +377,7 @@ public:
 	 *
 	 * @return    A string vector listing all feature keys of the database.
 	 */
-	vector<std::string> listAllFeatureKeys();
+  std::vector<std::string> listAllFeatureKeys();
 
 	
 	/**
