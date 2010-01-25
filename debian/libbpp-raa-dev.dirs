@@ -1,3 +1,4 @@
 usr/lib
 usr/include
-usr/include/Seq
+usr/include/Bpp
+usr/include/Bpp/Raa

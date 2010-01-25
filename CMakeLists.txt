@@ -29,56 +29,36 @@ set(BPPRAA_VERSION_MINOR ${BPPRAA_VERSION_AGE})
 set(BPPRAA_VERSION_PATCH ${BPPRAA_VERSION_REVISION})
 set(BPPRAA_VERSION "${BPPRAA_VERSION_MAJOR}.${BPPRAA_VERSION_MINOR}.${BPPRAA_VERSION_PATCH}")
 
-# Find the bpp-utils library
-find_path(BPPUTILS_INCLUDE_DIR Utils/Clonable.h)
-set(BPPUTILS_NAMES bpp-utils bpp-utilslib bpp-utilsdll)
-find_library(BPPUTILS_LIBRARY NAMES ${BPPUTILS_NAMES})
-set( BPPUTILS_LIBRARIES ${BPPUTILS_LIBRARY} )
-if(BPPUTILS_LIBRARY)
-  message("-- Found bpp-utils:")
-  message("   includes : ${BPPUTILS_INCLUDE_DIR}")
-  message("   libraries: ${BPPUTILS_LIBRARIES}")
-else(BPPUTILS_LIBRARY)
-  message(FATAL_ERROR "bpp-utils required but not found")
-endif(BPPUTILS_LIBRARY)
+# Set the CMAKE_PREFIX_PATH for the find_library fonction when using non
+# standard install location
+IF(CMAKE_INSTALL_PREFIX)
+  SET(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
+ENDIF(CMAKE_INSTALL_PREFIX)
 
-# Include the bpp-utils dependency
-include_directories(${BPPUTILS_INCLUDE_DIR})
-set(LIBS ${LIBS} ${BPPUTILS_LIBRARIES})
+#here is a useful function:
+MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
+  #start:
+  FIND_PATH(${lib_name}_INCLUDE_DIR ${include_to_find})
+  SET(${lib_name}_NAMES ${lib_name} ${lib_name}lib ${lib_name}dll)
+  FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES})
 
-# Find the bpp-numcalc library
-find_path(BPPNUMCALC_INCLUDE_DIR NumCalc/NumTools.h)
-set(BPPNUMCALC_NAMES bpp-numcalc bpp-numcalclib bpp-numcalcdll)
-find_library(BPPNUMCALC_LIBRARY NAMES ${BPPNUMCALC_NAMES})
-set( BPPNUMCALC_LIBRARIES ${BPPNUMCALC_LIBRARY} )
-if(BPPNUMCALC_LIBRARY)
-  message("-- Found bpp-numcalc:")
-  message("   includes : ${BPPNUMCALC_INCLUDE_DIR}")
-  message("   libraries: ${BPPNUMCALC_LIBRARIES}")
-else(BPPNUMCALC_LIBRARY)
-  message(FATAL_ERROR "bpp-numcalc required but not found")
-endif(BPPNUMCALC_LIBRARY)
+  IF(${lib_name}_LIBRARY)
+    MESSAGE("-- Library ${lib_name} found here:")
+    MESSAGE("   includes : ${${lib_name}_INCLUDE_DIR}")
+    MESSAGE("   libraries: ${${lib_name}_LIBRARY}")
+  ELSE(${lib_name}_LIBRARY)
+    MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
+  ENDIF(${lib_name}_LIBRARY)
+  
+  #add the dependency:
+  INCLUDE_DIRECTORIES(${${lib_name}_INCLUDE_DIR})
+  SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
+ENDMACRO(IMPROVED_FIND_LIBRARY)
 
-# Include the bpp-numcalc dependency
-include_directories(${BPPNUMCALC_INCLUDE_DIR})
-set(LIBS ${LIBS} ${BPPNUMCALC_LIBRARIES})
-
-# Find the bpp-seq library
-find_path(BPPSEQ_INCLUDE_DIR Seq/Alphabet.h)
-set(BPPSEQ_NAMES bpp-seq bpp-seqlib bpp-seqdll)
-find_library(BPPSEQ_LIBRARY NAMES ${BPPSEQ_NAMES})
-set( BPPSEQ_LIBRARIES ${BPPSEQ_LIBRARY} )
-if(BPPSEQ_LIBRARY)
-  message("-- Found bpp-seq:")
-  message("   includes : ${BPPSEQ_INCLUDE_DIR}")
-  message("   libraries: ${BPPSEQ_LIBRARIES}")
-else(BPPSEQ_LIBRARY)
-  message(FATAL_ERROR "bpp-seq required but not found")
-endif(BPPSEQ_LIBRARY)
-
-# Include the bpp-seq dependency
-include_directories(${BPPSEQ_INCLUDE_DIR})
-set(LIBS ${LIBS} ${BPPSEQ_LIBRARIES})
+#Find the Bio++ libraries:
+IMPROVED_FIND_LIBRARY(LIBS bpp-seq Seq/Alphabet.h)
+IMPROVED_FIND_LIBRARY(LIBS bpp-numcalc NumCalc/NumTools.h)
+IMPROVED_FIND_LIBRARY(LIBS bpp-utils Utils/Clonable.h)
 
 # Find the zlib installation
 find_package(ZLIB REQUIRED)
@@ -97,27 +77,19 @@ endif (DOXYGEN_FOUND)
 # Packager
 set(CPACK_PACKAGE_NAME "libbpp-raa")
 set(CPACK_PACKAGE_VENDOR "Bio++ Development Team")
-set(CPACK_PACKAGE_VERSION "1.0.0")
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION "0.1.0")
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "1")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Bio++ Remote Acnuc Acess library")
 set(CPACK_RESOURCE_FILE_LICENSE "COPYING")
 set(CPACK_RESOURCE_FILE_AUTHORS "AUTHORS")
-set(CPACK_GENERATOR "DEB;RPM")
 set(CPACK_SOURCE_GENERATOR "TGZ")
-set(CPACK_SYSTEM_NAME x86_64)
-set(CPACK_TOPLEVEL_TAG x86_64)
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE amd64)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Julien Dutheil <jdutheil@birc.au.dk>")
-set(CPACK_SOURCE_IGNORE_FILES
+SET(CPACK_SOURCE_IGNORE_FILES
  ".*CMakeFiles"
  ".*Makefile"
  ".*_CPack_Packages"
  ".*CMakeCache.txt"
- "debian/"
- "Utils.spec"
  ".*\\\\.cmake"
  ".*CVS/"
  ".*.gz"
@@ -126,8 +98,6 @@ set(CPACK_SOURCE_IGNORE_FILES
  ".*~"
  "Bpp/Raa/\\\\..*"
  "html"
- "autogen.sh"
- "autoclean.sh"
  ${CPACK_SOURCE_IGNORE_FILES}
 )
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
@@ -135,4 +105,14 @@ include(CPack)
 
 #This adds the 'dist' target
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+IF (UNIX)
+#This creates deb packages:
+ADD_CUSTOM_TARGET(deb fakeroot debian/rules binary)
+ADD_DEPENDENCIES(deb dist)
+
+#This creates rpm packages:
+ADD_CUSTOM_TARGET(rpm rpmbuild -ta ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
+ADD_DEPENDENCIES(rpm dist)
+
+ENDIF()
 

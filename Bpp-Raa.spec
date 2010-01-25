@@ -15,6 +15,7 @@ BuildRoot: %{_builddir}/%{name}-root
 Packager: Julien Dutheil
 AutoReqProv: no
 Requires: libstdc++6
+Requires: zlib >= 1.2.3
 Requires: Bpp-Utils = 1.4.0
 Requires: Bpp-NumCalc = 1.7.0
 Requires: Bpp-Seq = 1.6.0
@@ -27,6 +28,7 @@ It is part of the Bio++ project.
 Summary: Libraries, includes to develop applications with %{name}.
 Group: Development/Libraries
 Requires: %{name} = %{version}
+Requires: zlib-devel >= 1.2.3
 Requires: bpp-utils-devel = 1.4.0
 Requires: bpp-numcalc-devel = 1.7.0
 Requires: bpp-seq-devel = 1.6.0
@@ -39,7 +41,7 @@ building applications which use %{name}.
 %setup -q
 
 %build
-CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{_prefix}
+CFLAGS="$RPM_OPT_FLAGS" cmake -DCMAKE_INSTALL_PREFIX=%{_prefix}
 make
 
 %install
@@ -63,7 +65,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc AUTHORS COPYING INSTALL NEWS README ChangeLog
 %{_prefix}/lib/lib*.a
-%{_prefix}/lib/lib*.la
 %{_prefix}/include/*
 
 %changelog
