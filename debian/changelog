@@ -1,5 +1,5 @@
-libbpp-raa (0.1.0) unstable; urgency=low
+libbpp-raa (1.0.0) unstable; urgency=low
 
   * Initial Release.
 
- -- Julien Dutheil <jdutheil@birc.au.dk>  Wed, 24 Jun 2009 15:59:12 +0200
+ -- Julien Dutheil <julien.dutheil@univ-montp2.fr>  Thu, 25 Mar 2010 15:30:13 +0100

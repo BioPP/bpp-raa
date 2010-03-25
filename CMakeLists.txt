@@ -77,27 +77,28 @@ endif (DOXYGEN_FOUND)
 # Packager
 set(CPACK_PACKAGE_NAME "libbpp-raa")
 set(CPACK_PACKAGE_VENDOR "Bio++ Development Team")
-set(CPACK_PACKAGE_VERSION "0.1.0")
-set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "1")
+set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Bio++ Remote Acnuc Acess library")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Bio++ Remote Acnuc Access library")
 set(CPACK_RESOURCE_FILE_LICENSE "COPYING")
 set(CPACK_RESOURCE_FILE_AUTHORS "AUTHORS")
 set(CPACK_SOURCE_GENERATOR "TGZ")
 SET(CPACK_SOURCE_IGNORE_FILES
- ".*CMakeFiles"
- ".*Makefile"
- ".*_CPack_Packages"
- ".*CMakeCache.txt"
+ "CMakeFiles"
+ "Makefile"
+ "_CPack_Packages"
+ "CMakeCache.txt"
  ".*\\\\.cmake"
- ".*CVS/"
- ".*.gz"
- ".*.deb"
- ".*.rpm"
- ".*~"
+ "/CVS/"
+ ".*\\\\.gz"
+ ".*\\\\.deb"
+ ".*\\\\.rpm"
+ "\\\\..*\\\\.swp"
  "Bpp/Raa/\\\\..*"
  "html"
+ "Raa.tag"
  ${CPACK_SOURCE_IGNORE_FILES}
 )
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")

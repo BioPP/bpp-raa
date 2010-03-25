@@ -1,5 +1,5 @@
 %define name bpp-raa
-%define version 0.1.0
+%define version 1.0.0
 %define release 1
 %define _prefix /usr/local
 
@@ -16,9 +16,9 @@ Packager: Julien Dutheil
 AutoReqProv: no
 Requires: libstdc++6
 Requires: zlib >= 1.2.3
-Requires: Bpp-Utils = 1.4.0
-Requires: Bpp-NumCalc = 1.7.0
-Requires: Bpp-Seq = 1.6.0
+Requires: Bpp-Utils = 1.5.0
+Requires: Bpp-NumCalc = 1.8.0
+Requires: Bpp-Seq = 1.7.0
 
 %description
 This library contains utilitary and classes to query public database GenBank, EMBL, SwissProt, etc) using acnuc.
@@ -29,9 +29,9 @@ Summary: Libraries, includes to develop applications with %{name}.
 Group: Development/Libraries
 Requires: %{name} = %{version}
 Requires: zlib-devel >= 1.2.3
-Requires: bpp-utils-devel = 1.4.0
-Requires: bpp-numcalc-devel = 1.7.0
-Requires: bpp-seq-devel = 1.6.0
+Requires: bpp-utils-devel = 1.5.0
+Requires: bpp-numcalc-devel = 1.8.0
+Requires: bpp-seq-devel = 1.7.0
 
 %description devel
 The %{name}-devel package contains the header files and static libraries for
@@ -57,17 +57,19 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS COPYING INSTALL NEWS README ChangeLog
+%doc AUTHORS COPYING INSTALL ChangeLog
 %{_prefix}/lib/lib*.so
 %{_prefix}/lib/lib*.so.*
 
 %files devel
 %defattr(-,root,root)
-%doc AUTHORS COPYING INSTALL NEWS README ChangeLog
+%doc AUTHORS COPYING INSTALL ChangeLog
 %{_prefix}/lib/lib*.a
 %{_prefix}/include/*
 
 %changelog
+* Thu Mar 25 2010 Julien Dutheil <julien.dutheil@univ-montp2.fr>
+- Version 1.0.0
 * Wed Jun 24 2009 Julien Dutheil <jdutheil@birc.au.dk>
 - First draft of the spec file
 

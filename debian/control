@@ -2,7 +2,7 @@ Source: libbpp-raa
 Section: libs
 Priority: optional
 Maintainer: Julien Dutheil <jdutheil@birc.au.dk>
-Build-Depends: debhelper (>= 5), autotools-dev
+Build-Depends: debhelper (>= 5), cmake (>= 2.6)
 Standards-Version: 3.7.2
 
 Package: libbpp-raa-dev
