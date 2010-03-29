@@ -8,7 +8,7 @@ Standards-Version: 3.7.2
 Package: libbpp-raa-dev
 Section: libdevel
 Architecture: any
-Depends: libbpp-raa (= ${source:Version}), zlib1g-dev (>= 1.2.3), libbpp-utils-dev (= 1.4.0), libbpp-numcalc-dev (= 1.7.0), libbpp-seq-dev (= 1.6.0)
+Depends: libbpp-raa (= ${source:Version}), zlib1g-dev (>= 1.2.3), libbpp-utils-dev (= 1.5.0), libbpp-numcalc-dev (= 1.8.0), libbpp-seq-dev (= 1.7.0)
 Description: The Bio++ Remote Acnuc Access library development files.
  This library contains utilitary and classes to query public database GenBank, EMBL, SwissProt, etc) using acnuc.
  It is part of the Bio++ project.
@@ -16,7 +16,7 @@ Description: The Bio++ Remote Acnuc Access library development files.
 Package: libbpp-raa
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, zlib1g (>= 1.2.3), libbpp-utils (= 1.4.0), libbpp-numcalc (= 1.7.0), libbpp-seq (= 1.6.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, zlib1g (>= 1.2.3), libbpp-utils (= 1.5.0), libbpp-numcalc (= 1.8.0), libbpp-seq (= 1.7.0)
 Description: The Bio++ Remote Acnuc Access library.
  This library contains utilitary and classes to query public database GenBank, EMBL, SwissProt, etc) using acnuc.
  It is part of the Bio++ project.
