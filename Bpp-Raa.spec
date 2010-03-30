@@ -16,9 +16,9 @@ Packager: Julien Dutheil
 AutoReqProv: no
 Requires: libstdc++
 Requires: zlib >= 1.2.3
-Requires: Bpp-Utils = 1.5.0
-Requires: Bpp-NumCalc = 1.8.0
-Requires: Bpp-Seq = 1.7.0
+Requires: bpp-utils = 1.5.0
+Requires: bpp-numcalc = 1.8.0
+Requires: bpp-seq = 1.7.0
 
 %description
 This library contains utilitary and classes to query public database GenBank, EMBL, SwissProt, etc) using acnuc.
