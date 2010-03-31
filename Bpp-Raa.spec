@@ -1,7 +1,7 @@
 %define name bpp-raa
 %define version 1.0.0
 %define release 1
-%define _prefix /usr/local
+%define _prefix /usr
 
 Summary: The Bio++ Remote Acnuc Access library.
 Name: %{name}
