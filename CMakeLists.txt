@@ -97,6 +97,9 @@ SET(CPACK_SOURCE_IGNORE_FILES
  ".*\\\\.rpm"
  "\\\\..*\\\\.swp"
  "Bpp/Raa/\\\\..*"
+ "Bpp/Raa/libbpp*"
+ "debian/libbpp*"
+ "debian/tmp"
  "html"
  "Raa.tag"
  ${CPACK_SOURCE_IGNORE_FILES}
