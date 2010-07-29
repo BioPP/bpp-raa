@@ -61,7 +61,7 @@ Sequence *RAA::getSeq_both(const string &name_or_accno, int rank, int maxlength)
 	const Alphabet *alphab;
 	if(raa_data->swissprot || raa_data->nbrf) alphab = &AlphabetTools::PROTEIN_ALPHABET;
 	else alphab = &AlphabetTools::DNA_ALPHABET;
-	Sequence *seq = new Sequence(sname, *cseq, comment, alphab);
+	Sequence *seq = new BasicSequence(sname, *cseq, comment, alphab);
 	delete cseq;
 	return seq;
 }
@@ -223,7 +223,7 @@ Sequence *RAA::translateCDS(int seqrank) throw(BadCharException)
 	if(sname == NULL || pstring == NULL) return NULL;
 	Sequence *Sprot;
 	try {
-		Sprot = new Sequence(*sname, *pstring, &AlphabetTools::PROTEIN_ALPHABET );
+		Sprot = new BasicSequence(*sname, *pstring, &AlphabetTools::PROTEIN_ALPHABET );
 		}
 	catch (BadCharException e){
 		delete sname;
@@ -530,7 +530,7 @@ Sequence *RAA::getNextFeature(void *v)
 		if( *p == 27 /* esc */ ) p = read_sock(raa_data);
 		strcpy(data->line, p);
 		}
-	seq = new Sequence(name, seqdata, &AlphabetTools::DNA_ALPHABET);
+	seq = new BasicSequence(name, seqdata, &AlphabetTools::DNA_ALPHABET);
 	return seq;
 }
 
