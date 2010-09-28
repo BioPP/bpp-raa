@@ -9,8 +9,8 @@ extern "C" {
 	}
 
 #include <string>
-#include <Seq/Sequence.h>
-#include <Seq/alphabets>
+#include <Bpp/Seq/Sequence.h>
+#include <Bpp/Seq/Alphabet.all>
 
 #include "RaaList.h"
 #include "RaaSpeciesTree.h"

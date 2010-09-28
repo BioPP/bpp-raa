@@ -4,26 +4,26 @@
 
 # File list
 set(C_FILES
- md5.c
- parser.c
- zsockr.c
- misc_acnuc.c
- RAA_acnuc.c
+ Bpp/Raa/md5.c
+ Bpp/Raa/parser.c
+ Bpp/Raa/zsockr.c
+ Bpp/Raa/misc_acnuc.c
+ Bpp/Raa/RAA_acnuc.c
 )
 
 set(CPP_FILES
- RAA.cpp
- RaaList.cpp
- RaaSpeciesTree.cpp
+ Bpp/Raa/RAA.cpp
+ Bpp/Raa/RaaList.cpp
+ Bpp/Raa/RaaSpeciesTree.cpp
 )
 
 set(H_FILES
- parser.h
- RAA.h
- RaaSeqAttributes.h
- RAA_acnuc.h
- RaaList.h
- RaaSpeciesTree.h
+ Bpp/Raa/parser.h
+ Bpp/Raa/RAA.h
+ Bpp/Raa/RaaSeqAttributes.h
+ Bpp/Raa/RAA_acnuc.h
+ Bpp/Raa/RaaList.h
+ Bpp/Raa/RaaSpeciesTree.h
 )
 
 # Build the static lib
@@ -48,4 +48,4 @@ target_link_libraries(bppraa-shared ${LIBS})
 install(TARGETS bppraa-static bppraa-shared DESTINATION lib)
 
 # Install headers
-install(FILES ${H_FILES} DESTINATION include/Bpp/Raa)
+install(DIRECTORY Bpp/ DESTINATION include/Bpp FILES_MATCHING PATTERN ".svn" EXCLUDE PATTERN "*.h" PATTERN "*.all")

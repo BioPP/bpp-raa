@@ -56,9 +56,8 @@ MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
 ENDMACRO(IMPROVED_FIND_LIBRARY)
 
 #Find the Bio++ libraries:
-IMPROVED_FIND_LIBRARY(LIBS bpp-seq Seq/Alphabet.h)
-IMPROVED_FIND_LIBRARY(LIBS bpp-numcalc NumCalc/NumTools.h)
-IMPROVED_FIND_LIBRARY(LIBS bpp-utils Utils/Clonable.h)
+IMPROVED_FIND_LIBRARY(LIBS bpp-seq Bpp/Seq/Alphabet/Alphabet.h)
+IMPROVED_FIND_LIBRARY(LIBS bpp-core Bpp/Clonable.h)
 
 # Find the zlib installation
 find_package(ZLIB REQUIRED)
@@ -66,7 +65,7 @@ include_directories(${ZLIB_INCLUDE_DIR})
 set(LIBS ${LIBS} ${ZLIB_LIBRARIES})
 
 # Subdirectories
-add_subdirectory(Bpp/Raa)
+add_subdirectory(src)
 
 # Doxygen
 find_package(Doxygen)
@@ -91,13 +90,13 @@ SET(CPACK_SOURCE_IGNORE_FILES
  "_CPack_Packages"
  "CMakeCache.txt"
  ".*\\\\.cmake"
- "/CVS/"
+ ".*\\\\.svn"
  ".*\\\\.gz"
  ".*\\\\.deb"
  ".*\\\\.rpm"
  "\\\\..*\\\\.swp"
- "Bpp/Raa/\\\\..*"
- "Bpp/Raa/libbpp*"
+ "src/\\\\..*"
+ "src/libbpp*"
  "debian/libbpp*"
  "debian/tmp"
  "html"
