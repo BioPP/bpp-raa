@@ -71,6 +71,9 @@ add_subdirectory(src)
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
   add_custom_target (apidoc ${DOXYGEN_EXECUTABLE} Doxyfile)
+  ADD_CUSTOM_TARGET (apidoc-stable cp Doxyfile Doxyfile-stable
+    COMMAND echo "HTML_HEADER=header.html" >> Doxyfile-stable
+    COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile-stable )
 endif (DOXYGEN_FOUND)
 
 # Packager
