@@ -4,6 +4,24 @@
 #ifndef _RAA_H_
 #define _RAA_H_
 
+/**
+ * @mainpage
+ *
+ * Network access to sequence databases (embl, genbank, swissprot, and others).
+ *
+ * These classes provides network access to several nucleotide and protein sequence databases
+ * structured for multi-criteria retrieval under the ACNUC system as described in
+ * <a href=http://dx.doi.org/10.1016/j.biochi.2007.07.003>Remote access to ACNUC nucleotide 
+ * and protein sequence databases at PBIL</a>.
+ *
+ * The list of available databases is <a href=http://pbil.univ-lyon1.fr/databases/acnuc/banques_raa.php>here</a>.
+ * EMBL and GenBank are daily updated; SwissProt (it is in fact UniProt and includes SwissProt and trEMBL)
+ * is updated at each partial release; EMBLwgs is updated at each full release (that is, quarterly).
+ *
+ *
+ */
+
+
 extern "C" {
 #include "RAA_acnuc.h"
 	}
@@ -42,14 +60,7 @@ public:
 /**
  * @brief Network access to sequence databases (embl, genbank, swissprot, and others).
  *
- * This class provides network access to several nucleotide and protein sequence databases
- * structured for multi-criteria retrieval under the ACNUC system as described in
- * <a href=http://dx.doi.org/10.1016/j.biochi.2007.07.003>Remote access to ACNUC nucleotide 
- * and protein sequence databases at PBIL</a>.
- *
  * The list of available databases is <a href=http://pbil.univ-lyon1.fr/databases/acnuc/banques_raa.php>here</a>.
- * EMBL and GenBank are daily updated; SwissProt (it is in fact UniProt and includes SwissProt and trEMBL)
- * is updated at each partial release; EMBLwgs is updated at each full release (that is, quarterly).
  *
  * Access can be done to single sequences from their name or accession number
  * or to lists of sequences matching a query combining several retrieval criteria.
@@ -60,7 +71,6 @@ public:
  * Access is possible to database entries and also to subsequences, i.e., one or more fragments 
  * of one or more parent sequences defined by a feature table entry.
  * Subsequences are named by adding an extension (e.g., .PE1) to the name of their parent sequence.
- *
  */
 class RAA {
 	friend class RaaList;
