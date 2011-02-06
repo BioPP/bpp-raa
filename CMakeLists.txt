@@ -18,9 +18,9 @@ set(CMAKE_CXX_FLAGS "-Wall")
 #           library implements.
 # In other words, the library implements all the interface numbers in the
 # range from number current - age to current.
-set(BPPRAA_VERSION_CURRENT "1")
+set(BPPRAA_VERSION_CURRENT "2")
 set(BPPRAA_VERSION_REVISION "0")
-set(BPPRAA_VERSION_AGE "0")
+set(BPPRAA_VERSION_AGE "1")
 
 # Effective version number computation
 math(EXPR BPPRAA_VERSION_MAJOR "${BPPRAA_VERSION_CURRENT} -
@@ -79,8 +79,8 @@ endif (DOXYGEN_FOUND)
 # Packager
 set(CPACK_PACKAGE_NAME "libbpp-raa")
 set(CPACK_PACKAGE_VENDOR "Bio++ Development Team")
-set(CPACK_PACKAGE_VERSION "1.0.0")
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION "2.0.0")
+set(CPACK_PACKAGE_VERSION_MAJOR "2")
 set(CPACK_PACKAGE_VERSION_MINOR "0")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Bio++ Remote Acnuc Access library")
