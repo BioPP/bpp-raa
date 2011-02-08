@@ -1,3 +1,9 @@
+libbpp-raa (2.0.0) unstable; urgency=low
+
+  * Compatibility with Bio++ 2.0.0.
+
+ -- Julien Dutheil <julien.dutheil@univ-montp2.fr>  Mon, 07 Feb 2011 09:00:00 +0100
+
 libbpp-raa (1.0.0) unstable; urgency=low
 
   * Initial Release.
