@@ -49,7 +49,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS.txt COPYING.txt INSTALL;txt ChangeLog
+%doc AUTHORS.txt COPYING.txt INSTALL.txt ChangeLog
 %{_prefix}/lib/lib*.so
 %{_prefix}/lib/lib*.so.*
 
