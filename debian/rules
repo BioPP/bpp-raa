@@ -50,8 +50,8 @@ build-stamp:  config.status
 clean:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp 
-	rm -f CMakeCache.txt 
+	rm -f build-stamp
+	rm -f CMakeCache.txt
 
 	# Add here commands to clean up after the build process.
 	[ ! -f Makefile ] || $(MAKE) clean
@@ -99,7 +99,7 @@ binary-arch: build install
 	dh_fixperms
 #	dh_perl
 #	dh_python
-#	dh_makeshlibs
+	dh_makeshlibs
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol
