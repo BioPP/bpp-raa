@@ -103,32 +103,35 @@ SET(CPACK_SOURCE_IGNORE_FILES
  ".*\\\\..*\\\\.swp"
  "src/\\\\..*"
  "src/libbpp*"
+ "debian/tmp"
  "debian/libbpp.*/"
  "debian/libbpp.*\\\\.so.*"
  "debian/libbpp.*\\\\.a"
  "debian/libbpp.*\\\\.substvars"
  "debian/libbpp.*\\\\.debhelper"
  "debian/debhelper\\\\.log"
- "debian/tmp"
  "html"
  "Raa.tag"
  "Testing"
  "build-stamp"
  "genIncludes.py"
+ "install_manifest.txt"
+ "DartConfiguration.tcl"
  ${CPACK_SOURCE_IGNORE_FILES}
 )
 IF (MACOS)
   SET(CPACK_GENERATOR "Bundle")
 ENDIF()
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
-include(CPack)
+
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+INCLUDE(CPack)
 
 #This adds the 'dist' target
-add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+
 IF (UNIX)
 #This creates deb packages:
 ADD_CUSTOM_TARGET(deb dpkg-buildpackage)
-ADD_DEPENDENCIES(deb dist)
 
 #This creates rpm packages:
 ADD_CUSTOM_TARGET(rpm rpmbuild -ta ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)

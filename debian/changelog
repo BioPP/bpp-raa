@@ -1,6 +1,7 @@
 libbpp-raa (2.0.1) unstable; urgency=low
 
-  * fixed copiright and rules issue in package.
+   * RFP: Bio++ -- The Bio++ bioinformatics libraries. (Closes: #616373).
+   * Fixed copyright and rules issue in package.
 
  -- Julien Dutheil <julien.dutheil@univ-montp2.fr>  Mon, 28 Feb 2011 09:00:00 +0100
 
