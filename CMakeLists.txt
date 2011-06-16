@@ -10,6 +10,16 @@ if(NOT DEFINED CMAKE_BUILD_TYPE)
 endif(NOT DEFINED CMAKE_BUILD_TYPE)
 set(CMAKE_CXX_FLAGS "-Wall")
 
+IF(NOT NO_DEP_CHECK)
+  SET(NO_DEP_CHECK FALSE CACHE BOOL
+      "Disable dependencies check for building distribution only."
+      FORCE)
+ENDIF(NOT NO_DEP_CHECK)
+
+IF(NO_DEP_CHECK)
+  MESSAGE("-- Dependencies checking disabled. Only distribution can be built.")
+ELSE(NO_DEP_CHECK)
+
 # Libtool-like version number
 # CURRENT:REVISION:AGE => file.so.(C-A).A.R
 # current:  The most recent interface number that this library implements.
@@ -77,6 +87,8 @@ if (DOXYGEN_FOUND)
     COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile-stable )
 endif (DOXYGEN_FOUND)
 
+ENDIF(NO_DEP_CHECK)
+
 # Packager
 set(CPACK_PACKAGE_NAME "libbpp-raa")
 set(CPACK_PACKAGE_VENDOR "Bio++ Development Team")
@@ -131,6 +143,7 @@ INCLUDE(CPack)
 #This adds the 'dist' target
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
+IF(NOT NO_DEP_CHECK)
 IF (UNIX)
 #This creates deb packages:
 ADD_CUSTOM_TARGET(origdist COMMAND cp ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz ../${CPACK_DEBSOURCE_PACKAGE_FILE_NAME}.tar.gz)
@@ -144,3 +157,4 @@ ADD_DEPENDENCIES(rpm dist)
 
 ENDIF()
 
+ENDIF(NOT NO_DEP_CHECK)
