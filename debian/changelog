@@ -2,7 +2,7 @@ libbpp-raa (2.0.3-1) unstable; urgency=low
 
   * Recompilation because of dependencies.
 
- -- Julien Dutheil <julien.dutheil@univ-montp2.fr>  Thu, 09 Feb 2012 16:45:00 +0200
+ -- Julien Dutheil <julien.dutheil@univ-montp2.fr>  Thu, 09 Feb 2012 16:45:00 +0100
 
  libbpp-raa (2.0.2-1) unstable; urgency=low
 
