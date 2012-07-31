@@ -81,10 +81,15 @@ add_subdirectory(src)
 # Doxygen
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
-  add_custom_target (apidoc ${DOXYGEN_EXECUTABLE} Doxyfile)
-  ADD_CUSTOM_TARGET (apidoc-stable cp Doxyfile Doxyfile-stable
-    COMMAND echo "HTML_HEADER=header.html" >> Doxyfile-stable
-    COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile-stable )
+  ADD_CUSTOM_TARGET (apidoc cp Doxyfile ${CMAKE_BINARY_DIR}/Doxyfile-build
+    COMMAND echo "OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR}" >> ${CMAKE_BINARY_DIR}/Doxyfile-build
+    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile-build
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  ADD_CUSTOM_TARGET (apidoc-stable cp Doxyfile ${CMAKE_BINARY_DIR}/Doxyfile-stable
+    COMMAND echo "OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR}" >> ${CMAKE_BINARY_DIR}/Doxyfile-stable
+    COMMAND echo "HTML_HEADER=header.html" >> ${CMAKE_BINARY_DIR}/Doxyfile-stable
+    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile-stable
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif (DOXYGEN_FOUND)
 
 ENDIF(NO_DEP_CHECK)
