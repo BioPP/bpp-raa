@@ -1,5 +1,5 @@
 %define _basename bpp-raa
-%define _version 2.0.3
+%define _version 2.1.0
 %define _release 1
 %define _prefix /usr
 
@@ -76,7 +76,99 @@ rm -rf $RPM_BUILD_ROOT
 
 %post -n libbpp-raa1 -p /sbin/ldconfig
 
+%post -n libbpp-raa-devel
+createGeneric() {
+  echo "-- Creating generic include file: $1.all"
+  #Make sure we run into subdirectories first:
+  dirs=()
+  for file in "$1"/*
+  do
+    if [ -d "$file" ]
+    then
+      # Recursion:
+      dirs+=( "$file" )
+    fi
+  done
+  for dir in ${dirs[@]}
+  do
+    createGeneric $dir
+  done
+  #Now list all files, including newly created .all files:
+  if [ -f $1.all ]
+  then
+    rm $1.all
+  fi
+  dir=`basename $1`
+  for file in "$1"/*
+  do
+    if [ -f "$file" ] && ( [ "${file##*.}" == "h" ] || [ "${file##*.}" == "all" ] )
+    then
+      file=`basename $file`
+      echo "#include \"$dir/$file\"" >> $1.all
+    fi
+  done;
+}
+# Actualize .all files
+createGeneric %{_prefix}/include/Bpp
+exit 0
+
+%preun -n libbpp-raa-devel
+removeGeneric() {
+  if [ -f $1.all ]
+  then
+    echo "-- Remove generic include file: $1.all"
+    rm $1.all
+  fi
+  for file in "$1"/*
+  do
+    if [ -d "$file" ]
+    then
+      # Recursion:
+      removeGeneric $file
+    fi
+  done
+}
+# Actualize .all files
+removeGeneric %{_prefix}/include/Bpp
+exit 0
+
 %postun -n libbpp-raa1 -p /sbin/ldconfig
+
+%postun -n libbpp-raa-devel
+createGeneric() {
+  echo "-- Creating generic include file: $1.all"
+  #Make sure we run into subdirectories first:
+  dirs=()
+  for file in "$1"/*
+  do
+    if [ -d "$file" ]
+    then
+      # Recursion:
+      dirs+=( "$file" )
+    fi
+  done
+  for dir in ${dirs[@]}
+  do
+    createGeneric $dir
+  done
+  #Now list all files, including newly created .all files:
+  if [ -f $1.all ]
+  then
+    rm $1.all
+  fi
+  dir=`basename $1`
+  for file in "$1"/*
+  do
+    if [ -f "$file" ] && ( [ "${file##*.}" == "h" ] || [ "${file##*.}" == "all" ] )
+    then
+      file=`basename $file`
+      echo "#include \"$dir/$file\"" >> $1.all
+    fi
+  done;
+}
+# Actualize .all files
+createGeneric %{_prefix}/include/Bpp
+exit 0
 
 %files -n libbpp-raa1
 %defattr(-,root,root)
@@ -91,6 +183,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/include/*
 
 %changelog
+* Thu Mar 07 2013 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.1.0-1
+- Compatibility update.
 * Thu Feb 09 2012 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.0.3-1
 - Compatibility update.
 * Thu Jun 09 2011 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.0.2-1

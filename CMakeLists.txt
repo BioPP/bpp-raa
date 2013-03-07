@@ -29,7 +29,7 @@ ELSE(NO_DEP_CHECK)
 # In other words, the library implements all the interface numbers in the
 # range from number current - age to current.
 set(BPPRAA_VERSION_CURRENT "2")
-set(BPPRAA_VERSION_REVISION "0")
+set(BPPRAA_VERSION_REVISION "1")
 set(BPPRAA_VERSION_AGE "1")
 
 # Effective version number computation
@@ -97,10 +97,10 @@ ENDIF(NO_DEP_CHECK)
 # Packager
 set(CPACK_PACKAGE_NAME "libbpp-raa")
 set(CPACK_PACKAGE_VENDOR "Bio++ Development Team")
-set(CPACK_PACKAGE_VERSION "2.0.3")
+set(CPACK_PACKAGE_VERSION "2.1.0")
 set(CPACK_PACKAGE_VERSION_MAJOR "2")
-set(CPACK_PACKAGE_VERSION_MINOR "0")
-set(CPACK_PACKAGE_VERSION_PATCH "3")
+set(CPACK_PACKAGE_VERSION_MINOR "1")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Bio++ Remote Acnuc Access library")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING.txt")
 set(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS.txt")
@@ -132,7 +132,6 @@ SET(CPACK_SOURCE_IGNORE_FILES
  "Raa.tag"
  "Testing"
  "build-stamp"
- "genIncludes.py"
  "install_manifest.txt"
  "DartConfiguration.tcl"
  ${CPACK_SOURCE_IGNORE_FILES}
