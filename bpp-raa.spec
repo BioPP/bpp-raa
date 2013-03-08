@@ -38,7 +38,7 @@ Summary: Bio++ Remote Acnuc Access library
 Group: Development/Libraries/C and C++
 
 %description -n libbpp-raa1
-This library contains utilitary and classes to query public database GenBank, EMBL, SwissProt, etc) using acnuc.
+This library contains utilitary and classes to query public database (GenBank, EMBL, SwissProt, etc) using acnuc.
 It is part of the Bio++ project.
 
 %package -n libbpp-raa-devel
@@ -53,7 +53,7 @@ Requires: zlib >= 1.2.3
 Requires: zlib-devel >= 1.2.3
 
 %description -n libbpp-raa-devel
-The %libbpp-raa-devel package contains the header files and static libraries for
+The libbpp-raa-devel package contains the header files and static libraries for
 building applications which use %{_basename}.
 
 %prep
