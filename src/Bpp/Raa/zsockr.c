@@ -1,6 +1,6 @@
 /* functions to handle zlib-compressed data read from socket
 */
-#include "zlib.h"
+#include <zlib.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>

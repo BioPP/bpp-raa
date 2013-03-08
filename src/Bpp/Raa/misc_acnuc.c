@@ -52,7 +52,7 @@ for(i=strlen(pname);i<length;i++) pname[i]=' ';
 }
 
 
-#define TOTCODES 17  /* nbre total de codes definis, 0 inclus */
+#define TOTCODES 18  /* nbre total de codes definis, 0 inclus */
 int totcodes=TOTCODES;
 
 char aminoacids[]="RLSTPAGVKNQHEDYCFIMW*X";
@@ -289,7 +289,20 @@ struct genetic_code_libel genetic_code[TOTCODES] =
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,0, /* GUG */
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 
 }
-
+  ,
+  { /* 17:   MITOCHONDRIAL CODE OF Pterobranchia */
+    {"UGA=W  AGA=S  AGG=K"},
+/*ANN*/	{9,10,9,10,4,4,4,4,3,3,9,3,18,18,19,18,
+/*CNN*/	11,12,11,12,5,5,5,5,1,1,1,1,2,2,2,2,
+/*GNN*/	13,14,13,14,6,6,6,6,7,7,7,7,8,8,8,8,
+/*TNN*/	21,15,21,15,3,3,3,3,20,16,20,16,2,17,2,17,22},
+/*ncbi*/24,
+/*init*/{0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,0, /* AUG */
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,0, /* CUG */
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,0} /* UUG */
+  }
+  
 
 /*       1         2
 1234567890123456789012

@@ -13,6 +13,9 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <termios.h>
+#elif defined(WIN32)
+#include <Ws2tcpip.h>
+#include <Wspiapi.h>
 #endif
 
 
@@ -313,9 +316,8 @@ clientid: NULL or a string identifying the client
 */
 {
   raa_db_access *raa_current_db;
-  struct hostent *he;
-  struct sockaddr_in their_addr;
-  char *reponse;
+  struct addrinfo *ai;
+  char *reponse, portstring[10];
   int err;
 #ifdef WIN32
 WSADATA mywsadata;
@@ -350,22 +352,22 @@ raa_current_db->raa_sockfdr = fdopen(raa_snum,"r");
 raa_current_db->raa_sockfdw = fdopen(raa_snum,"a");
 #endif
 
-  if ((he = gethostbyname(serveurName)) == NULL) {
-  	list_open_dbs_remove(raa_current_db);
-  	return errservname;
-  	}
-  their_addr.sin_family = AF_INET;
-  their_addr.sin_port = htons(port);
-  their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-  memset(their_addr.sin_zero, '\0', 8);
+  sprintf(portstring, "%d", port);
+  err = getaddrinfo(serveurName, portstring, NULL, &ai);
+  if (err) {
+    list_open_dbs_remove(raa_current_db);
+    return errservname;
+    }
+  err = connect(raa_snum, ai->ai_addr, ai->ai_addrlen);
+  freeaddrinfo(ai); 
   
- err = connect(raa_snum, (struct sockaddr *)&their_addr, sizeof(struct sockaddr) );
  if (err != 0) {
   	list_open_dbs_remove(raa_current_db);
  	return cantopensocket;
  	}
- reponse=read_sock(raa_current_db);
- if(reponse == NULL) {
+  // read first reply from the server
+  reponse = read_sock_timeout(raa_current_db, 1000*60 /* 1 min */);
+  if(reponse == NULL || strcmp(reponse, "OK acnuc socket started") != 0) {
   	list_open_dbs_remove(raa_current_db);
  	return cantopensocket;
  	}
@@ -2726,8 +2728,31 @@ else	{
 	}	
 }
 
+static void redresse_branches(raa_node *pere)
+/* Recursively reverse the order of descendants because it has been reversed
+ */
+{
+  struct raa_pair *point, *next1, *next2, *last;
+  point = pere->list_desc;
+  if (!point) return;
+  next1 = point->next;
+  if (next1) point->next = NULL;
+  while (TRUE) {
+    last = point;
+    redresse_branches(point->value);
+    if (!next1) break;
+    next2 = next1->next;
+    next1->next = point;
+    point = next1;
+    next1 = next2;
+    }
+  pere->list_desc = last;
+}
+
 
 static void ajout_branche(raa_node *pere, raa_node *fils)
+/* adds a pere->fils branch. The last added branch is the first child of pere.
+ */
 {
 struct raa_pair *point, *nouveau;
 
@@ -2737,8 +2762,8 @@ if( (point = pere->list_desc) == NULL) {
 	pere->list_desc = nouveau;
 	}
 else	{
-	while(point->next != NULL) point = point->next;
-	point->next = nouveau;
+  nouveau->next = pere->list_desc;
+  pere->list_desc = nouveau;
 	}
 }
 
@@ -2751,7 +2776,6 @@ synonyme est identifie par pere < 0 et -pere = son principal
 { 
 int num, pere, count, l;
 char *p, *q, *name, *libel;
-
 
 num = atoi(reponse);
 p = strchr(reponse, '&');
@@ -2897,6 +2921,7 @@ while(TRUE) {
 	}
 close_sock_gz_r(opaque);
 if(tab_noeud != NULL) {
+	redresse_branches(tab_noeud[2]);
 	raa_calc_taxo_count(tab_noeud[2]);
 	free(tab_noeud[2]->name);
 	tab_noeud[2]->name = strdup(rootname);
