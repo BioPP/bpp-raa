@@ -30,7 +30,7 @@ AutoReq: yes
 AutoProv: yes
 
 %description
-This library contains utilitary and classes to query public database GenBank, EMBL, SwissProt, etc) using acnuc.
+This library contains utilitary and classes to query public database (GenBank, EMBL, SwissProt, etc) using acnuc.
 It is part of the Bio++ project.
 
 %package -n libbpp-raa1
@@ -42,7 +42,7 @@ This library contains utilitary and classes to query public database GenBank, EM
 It is part of the Bio++ project.
 
 %package -n libbpp-raa-devel
-Summary: Libraries, includes to develop applications with %{_basename}.
+Summary: Libraries, includes to develop applications with %{_basename}
 Group: Development/Libraries/C and C++
 Requires: libbpp-raa1 = %{_version}
 Requires: libbpp-seq9 = %{_version}
