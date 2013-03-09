@@ -22,7 +22,6 @@ int get_acnuc_gc_number(int ncbi_gc);
 int strcmptrail(char *s1, int l1, char *s2, int l2);
 void majuscules(char *name);
 void compact(char *chaine);
-void *mycalloc(int nbr, size_t taille);
 char complementer_base(char nucl);
 void complementer_seq(char *deb_ch, int l);
 char init_codon_to_aa(char *codon, int gc);
@@ -439,20 +438,6 @@ while((p=strchr(chaine,' '))!=NULL) {
 	while(*q!=0) {*(q-l) = *q; q++; }
 	*(q-l)=0;
 	}
-}
-
-
-
-void *mycalloc(int nbre, size_t size)
-{
-void *point;
-
-point = calloc(nbre,size);
-if(point == NULL) {
-	fprintf(stderr,"Error: problem allocating memory.\n");
-	exit(1);
-	}
-return point;
 }
 
 

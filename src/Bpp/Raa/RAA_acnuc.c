@@ -34,7 +34,6 @@ char codaa(char *codon, int code);
 void *prepare_sock_gz_r(FILE *sockr);
 char *z_read_sock(void *v);
 int close_sock_gz_r(void *v);
-void *mycalloc(int nbr, size_t taille);
 char *unprotect_quotes(char *name);
 
 
@@ -195,8 +194,9 @@ static char *read_sock_tell(raa_db_access *raa_current_db, int *wascompleteline)
 			);
 		if(raa_error_mess_proc == NULL) {
 			fprintf(stderr, "%s: %s\n", raa_current_db->dbname, buffer);
-			raa_acnucclose(raa_current_db);
-			exit(ERREUR);
+			/*raa_acnucclose(raa_current_db);
+			exit(ERREUR);*/
+		        return NULL;
 			}
 		else (*raa_error_mess_proc)(raa_current_db, buffer);/*this function sd call raa_acnucclose*/
 		was_here = FALSE;
@@ -2756,7 +2756,7 @@ static void ajout_branche(raa_node *pere, raa_node *fils)
 {
 struct raa_pair *point, *nouveau;
 
-nouveau = (struct raa_pair *)mycalloc(1,sizeof(struct raa_pair));
+nouveau = (struct raa_pair *)calloc(1,sizeof(struct raa_pair));
 nouveau->value = fils;
 if( (point = pere->list_desc) == NULL) {
 	pere->list_desc = nouveau;
