@@ -1,5 +1,5 @@
 %define _basename bpp-raa
-%define _version 2.1.0
+%define _version 2.2.0
 %define _release 1
 %define _prefix /usr
 
@@ -183,6 +183,8 @@ exit 0
 %{_prefix}/include/*
 
 %changelog
+* Mon Sep 22 2014 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.2.0-1
+- Compatibility update.
 * Thu Mar 07 2013 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.1.0-1
 - Compatibility update.
 * Thu Feb 09 2012 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.0.3-1
