@@ -480,7 +480,7 @@ public:
 	 * Usage example:
 	 * @code
 	 RAA *mydb = new RAA("swissprot");
-	 cout << "mydb is " << mydb->get_raa_data()->swissprot ? "" : "not" << " a protein database." << endl;
+	 cout << "mydb is" << (mydb->get_raa_data()->swissprot ? " " : " not ") << "a protein database." << endl;
 	 * @endcode
 	 * @return    A pointer to a structure of type raa_db_access.
 	 */
