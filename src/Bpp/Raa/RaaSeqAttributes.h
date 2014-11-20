@@ -32,7 +32,10 @@ public:
 	int getRank() {return rank; };
 	
 	/**
-	 * @brief    Returns the sequence's NCBI genetic code number (1 is universal). Meaningful only for CDS sequences.
+	 * @brief    Returns the sequence's NCBI genetic code number (1 is universal). 
+   
+   Meaningful only for CDS sequences. 
+   See <a href=http://doua.prabi.fr/databases/acnuc_data/glossary#GCODE> a description of NCBI-defined genetic codes</a>.
 	 */
 	int getGeneticCode() {return ncbi_gc; };
 	
