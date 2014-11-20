@@ -473,6 +473,18 @@ public:
 	
 	/** @} */
 
+	/**
+	 * @brief    returns a pointer to a structure containing various information about the database.
+	 *
+	 * See http://doua.prabi.fr/databases/acnuc_data/raa_acnuc#raa_db_access for a description of the raa_db_access structure.
+	 * Usage example:
+	 * @code
+	 RAA *mydb = new RAA("swissprot");
+	 cout << "mydb is " << mydb->get_raa_data()->swissprot ? "" : "not" << " a protein database." << endl;
+	 * @endcode
+	 * @return    A pointer to a structure of type raa_db_access.
+	 */
+	raa_db_access *get_raa_data() { return raa_data; }
 	
 protected:
 	raa_db_access *raa_data;
