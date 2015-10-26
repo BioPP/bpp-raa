@@ -14,6 +14,7 @@
 #include <sys/time.h>
 #include <termios.h>
 #elif defined(WIN32)
+#include <Winsock2.h>
 #include <Ws2tcpip.h>
 #include <Wspiapi.h>
 #endif
@@ -21,12 +22,13 @@
 
 #define SERVER_UPDATE_MESSAGE "acnuc stop for update\n"
 /* seules fctions utilisables hors de ce fichier pour ecrire sur socket */
-int sock_fputs(raa_db_access *f, char *l);
+int sock_fputs(raa_db_access *f, const char *l);
 int sock_flush(raa_db_access *f);
 
 /* some prototypes */
 void raa_acnucclose(raa_db_access *raa_current_db);
-void list_open_dbs_remove(raa_db_access *raa_current_db);
+static char *protect_quotes(char *name);
+static void raa_free_matchkeys(raa_db_access *raa_current_db);
 
 /* needed functions */
 extern char init_codon_to_aa(char *codon, int gc);
@@ -41,11 +43,6 @@ char *unprotect_quotes(char *name);
 void (*raa_error_mess_proc)(raa_db_access *, char *) = NULL;
 
 #define MAX_RDSHRT 50 /* max short list length read in one time */
-
-
-
-static raa_db_access *init_raa_db_access(void);
-static struct chain_void *raa_list_open_dbs = NULL;
 
 #if defined(WIN32)
 
@@ -107,7 +104,7 @@ return mswin_sock_flush(raa_current_db);
 }
 
 
-int sock_fputs(raa_db_access  *raa_current_db, char *s)
+int sock_fputs(raa_db_access  *raa_current_db, const char *s)
 {
 int l, r;
 
@@ -132,7 +129,7 @@ return 0;
 
 #else
 
-int sock_fputs(raa_db_access  *raa_current_db, char *s)
+int sock_fputs(raa_db_access  *raa_current_db, const char *s)
 {
 if(raa_current_db == NULL) return EOF;
 return fputs(s, raa_current_db->raa_sockfdw);
@@ -151,11 +148,10 @@ int sock_printf(raa_db_access  *raa_current_db, const char *fmt, ...)
 {
 va_list ap;
 int retval;
-static char buffer[1000];
 
 va_start(ap, fmt);
-vsprintf(buffer, fmt, ap);
-retval = sock_fputs(raa_current_db, buffer);
+vsprintf(raa_current_db->buffer, fmt, ap);
+retval = sock_fputs(raa_current_db, raa_current_db->buffer);
 va_end(ap);
 return retval;
 }
@@ -166,51 +162,44 @@ return retval;
 /* lit une ligne au plus de la socket et transfere le resultat dans une chaine char *   */
 
 static char *read_sock_tell(raa_db_access *raa_current_db, int *wascompleteline) {
-#define RSOCKBUFS 5000
   int lnbuf, isfull;  
   char *p ;
-  static char buffer[RSOCKBUFS];
-  static int was_here = FALSE;
   
-  if(raa_current_db == NULL || was_here) return NULL;
+  if(raa_current_db == NULL || raa_current_db->was_here) return NULL;
   sock_flush(raa_current_db); /* tres important */
   isfull = FALSE;
 #if defined(WIN32)
-  p = sock_fgets(raa_current_db, buffer, RSOCKBUFS);
+  p = sock_fgets(raa_current_db, raa_current_db->buffer, sizeof(raa_current_db->buffer));
 #else
-  p = fgets(buffer, RSOCKBUFS, raa_current_db->raa_sockfdr);
+  p = fgets(raa_current_db->buffer, sizeof(raa_current_db->buffer), raa_current_db->raa_sockfdr);
 #endif
   if(p == NULL || strcmp(p, SERVER_UPDATE_MESSAGE) == 0) {
-	if(!was_here) {
-		was_here = TRUE;
-		*buffer = 0;
+	if(!raa_current_db->was_here) {
+		raa_current_db->was_here = TRUE;
+		*raa_current_db->buffer = 0;
 		if(raa_current_db != NULL && raa_current_db->dbname != NULL) {
-			sprintf(buffer, "%s: ", raa_current_db->dbname);
+			sprintf(raa_current_db->buffer, "%s: ", raa_current_db->dbname);
 			}
-		strcat(buffer, ( p == NULL ?
+		strcat(raa_current_db->buffer, ( p == NULL ?
   			"Error: connection to acnuc server is down. Please try again."
   			:
 			"Error: acnuc server is down for database update. Please try again later." )
 			);
 		if(raa_error_mess_proc == NULL) {
-			fprintf(stderr, "%s: %s\n", raa_current_db->dbname, buffer);
-			/*raa_acnucclose(raa_current_db);
-			exit(ERREUR);*/
-		        return NULL;
+			fprintf(stderr, "%s\n", raa_current_db->buffer);
 			}
-		else (*raa_error_mess_proc)(raa_current_db, buffer);/*this function sd call raa_acnucclose*/
-		was_here = FALSE;
+		else (*raa_error_mess_proc)(raa_current_db, raa_current_db->buffer);
 		}
 	return NULL;
 	}
 	
-  was_here = FALSE;
-  lnbuf = strlen(buffer);
-  p = buffer + lnbuf - 1;
+  raa_current_db->was_here = FALSE;
+  lnbuf = strlen(raa_current_db->buffer);
+  p = raa_current_db->buffer + lnbuf - 1;
   if(*p ==  '\n') isfull = TRUE;
-  while(p >= buffer && (*p ==  '\n' || *p == '\r') ) *(p--) = 0;
+  while(p >= raa_current_db->buffer && (*p ==  '\n' || *p == '\r') ) *(p--) = 0;
   if(wascompleteline != NULL) *wascompleteline = isfull;
-  return buffer; 
+  return raa_current_db->buffer; 
 }
 
 
@@ -218,23 +207,21 @@ char *read_sock(raa_db_access *raa_current_db) /* lit une ligne entiere, rend li
 {
 int wasfull, l2, l = 0;
 char *p;
-static char *reponse = NULL;
-static int lr = 0;
 
 do	{
 	p = read_sock_tell(raa_current_db, &wasfull);
 	if(p == NULL) return NULL;
 	l2 = strlen(p);
-	if(l + l2 +  1 > lr) {
-		lr = l + l2 +  1;
-		reponse = (char *)realloc(reponse, lr);
+	if(l + l2 +  1 > raa_current_db->max_full_line) {
+		raa_current_db->max_full_line = l + l2 +  100;
+		raa_current_db->full_line = (char *)realloc(raa_current_db->full_line, raa_current_db->max_full_line);
 		}
-	memcpy(reponse + l, p, l2);
+	memcpy(raa_current_db->full_line + l, p, l2);
 	l += l2;
 	}
 while(! wasfull);
-reponse[l] = 0;
-return reponse;
+raa_current_db->full_line[l] = 0;
+return raa_current_db->full_line;
 }
 
 
@@ -274,7 +261,7 @@ badracnuc,  /* 8 enviroment variables racnuc or acnuc undefined or inadequate */
 nosocket /* 9 no socket was opened yet */
 };
 
-int raa_acnucopen (char *clientid, raa_db_access **psock) 
+int raa_acnucopen (const char *clientid, raa_db_access **psock) 
 /* opens the acnuc db using the environment variable racnuc, or, if undefined, acnuc,
 that should be defined to an url of the form
 raa://pbil.univ-lyon1.fr:5558/embl
@@ -289,11 +276,13 @@ if(p == NULL) return badracnuc;
 err = raa_decode_address(p, &serveurName, &port, &db_name);
 if(err) return badracnuc;
 err = raa_acnucopen_alt (serveurName,  port, db_name, clientid, psock);
+free(serveurName); 
+if (db_name) free(db_name);
 return err;
 }
 
 
-int raa_acnucopen_alt (char *serveurName, int port, char *db_name, char *clientid, raa_db_access **p) 
+int raa_acnucopen_alt (const char *serveurName, int port, const char *db_name, const char *clientid, raa_db_access **p) 
 /*
 clientid: NULL or a string identifying the client
 */
@@ -304,13 +293,13 @@ int err;
  if(err != 0) return err;
  err = raa_opendb(*p, db_name);
  if(err != 0) {
-  	list_open_dbs_remove(*p);
+  	free(*p);
  	}
  return err;
  }
 
 
-int raa_open_socket(char *serveurName, int port, char *clientid, raa_db_access **psock)
+int raa_open_socket(const char *serveurName, int port, const char *clientid, raa_db_access **psock)
 /*
 clientid: NULL or a string identifying the client
 */
@@ -326,20 +315,20 @@ SOCKET raa_snum;
 int raa_snum;
 #endif
 
-raa_current_db = init_raa_db_access();
+raa_current_db = (raa_db_access *)calloc(1, sizeof(raa_db_access));
 if(raa_current_db == NULL) return nomemory; /* not enough memory */
   /* création de la socket */
 #ifdef WIN32
   err = WSAStartup(MAKEWORD(2,2), &mywsadata); /* indispensable avant utilisation socket */
   if (err == 0) raa_snum = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, (GROUP)0, 0);
   if (err != 0 || raa_snum == INVALID_SOCKET) {
-  	list_open_dbs_remove(raa_current_db);
+  	free(raa_current_db);
   	return cantopensocket;
   	}
 #else
   raa_snum = socket(AF_INET, SOCK_STREAM, 0);
   if (raa_snum == -1) {
-  	list_open_dbs_remove(raa_current_db);
+  	free(raa_current_db);
   	return cantopensocket;
   	}
 #endif
@@ -355,27 +344,27 @@ raa_current_db->raa_sockfdw = fdopen(raa_snum,"a");
   sprintf(portstring, "%d", port);
   err = getaddrinfo(serveurName, portstring, NULL, &ai);
   if (err) {
-    list_open_dbs_remove(raa_current_db);
+    free(raa_current_db);
     return errservname;
     }
   err = connect(raa_snum, ai->ai_addr, ai->ai_addrlen);
   freeaddrinfo(ai); 
   
  if (err != 0) {
-  	list_open_dbs_remove(raa_current_db);
+  	free(raa_current_db);
  	return cantopensocket;
  	}
   // read first reply from the server
   reponse = read_sock_timeout(raa_current_db, 1000*60 /* 1 min */);
   if(reponse == NULL || strcmp(reponse, "OK acnuc socket started") != 0) {
-  	list_open_dbs_remove(raa_current_db);
+  	free(raa_current_db);
  	return cantopensocket;
  	}
  if(clientid != NULL) {
  	sock_printf(raa_current_db, "clientid&id=\"%s\"\n", clientid);
 	reponse=read_sock(raa_current_db);
 	if(reponse == NULL) {
-  		list_open_dbs_remove(raa_current_db);
+  		free(raa_current_db);
 		return cantopensocket;
 		}
 	}
@@ -386,7 +375,7 @@ raa_current_db->raa_sockfdw = fdopen(raa_snum,"a");
 
 extern void raa_MD5String (char *in_string, char out_digest[33]);
 
-int raa_opendb_pw(raa_db_access *raa_current_db, char *db_name, void *ptr, char *(*getpasswordf)(void *) )
+int raa_opendb_pw(raa_db_access *raa_current_db, const char *db_name, void *ptr, char *(*getpasswordf)(void *) )
 /*
 getpasswordf: pointer to function that gets called if a password is needed
 ptr: pointer to data passed to the getpasswordf function
@@ -400,7 +389,7 @@ return values :
 {
 Reponse *rep;
 char *reponse, *code, *p, *challenge;
-int codret, totspecs, totkeys;
+int codret, totspecs, totkeys, i;
 
 if(raa_current_db == NULL) return nosocket;
  sock_printf(raa_current_db, "acnucopen&db=%s\n", db_name);
@@ -412,7 +401,7 @@ if(raa_current_db == NULL) return nosocket;
  codret=atoi(code);
  free(code);
  if(codret == 6) {
-	static char reply[33], tmp[300];
+	char reply[33], tmp[300];
 	char *password = NULL;
 	clear_reponse(rep);
 	if(getpasswordf != NULL) password = getpasswordf(ptr);
@@ -437,7 +426,15 @@ if (codret != 0) {
  	return codret;
  	} 
  
-p = val(rep,"type");
+  /* initialiser les champs non nuls */
+  raa_current_db->gfrag_data.l_nseq_buf = INT_MAX;
+  raa_current_db->nextelt_data.current_rank = -1;
+  raa_current_db->nextelt_data.previous = -2;
+  raa_current_db->readshrt_data.shrt_begin = S_BUF_SHRT - 1;
+#ifdef WIN32
+  raa_current_db->sock_input_pos = raa_current_db->sock_input; raa_current_db->sock_input_end = raa_current_db->sock_input;
+#endif
+  p = val(rep,"type");
 raa_current_db->dbname = strdup(db_name);
 raa_current_db->genbank = raa_current_db->embl = raa_current_db->swissprot = 
 	raa_current_db->nbrf = FALSE;
@@ -469,6 +466,7 @@ raa_current_db->longa=(raa_current_db->maxa-1)/(8 * sizeof(int))+1;
 	raa_current_db->WIDTH_KW = 40;
 	raa_current_db->lrtxt = 60;
 	raa_current_db->SUBINLNG=63;
+        raa_current_db->VALINSHRT2=0;
 	raa_current_db->ACC_LENGTH=13; /* conservative value */
 p = val(rep,"L_MNEMO");
 if(p != NULL) { raa_current_db->L_MNEMO = atoi(p); free(p); }
@@ -490,16 +488,29 @@ p = val(rep,"SUBINLNG");
 if(p != NULL) { 
 	raa_current_db->SUBINLNG = atoi(p); 
 	free(p); 
-	raa_current_db->rlng_buffer = (struct rlng *)realloc(raa_current_db->rlng_buffer, 
-		(raa_current_db->SUBINLNG + 1) * sizeof(int));
+	raa_current_db->rlng_buffer = (struct rlng *)calloc((raa_current_db->SUBINLNG + 1), sizeof(int));
 	}
-
+p = val(rep,"VALINSHRT2");
+if (p != NULL) {
+  raa_current_db->VALINSHRT2 = atoi(p); free(p);
+}
+  if (raa_current_db->VALINSHRT2) {
+    for (i = raa_sub_of_bib; i <= raa_acc_of_loc; i++) {
+      int size = 100 * raa_current_db->VALINSHRT2;
+      raa_current_db->readshrt2_data[i] = (struct shrt2_list*)malloc(sizeof(int) * (size + 4));
+      raa_current_db->readshrt2_data[i]->size = size;
+      raa_current_db->readshrt2_data[i]->length = 0;
+      raa_current_db->readshrt2_data[i]->point = 0;
+      raa_current_db->readshrt2_data[i]->next = 0;
+    }
+  }
+  
 clear_reponse(rep);
 return 0;
 }
 
 
-int raa_opendb(raa_db_access *raa_current_db, char *db_name)
+int raa_opendb(raa_db_access *raa_current_db, const char *db_name)
 {
 return raa_opendb_pw(raa_current_db, db_name, NULL, NULL);
 }
@@ -511,14 +522,15 @@ return !=0 if error
 */
 {
 char *p, *q;
-static char ip_name[200];
-static char remote_db[100];
+char *ip_name;
+char *remote_db;
 
 p = url;
 if(p == NULL) return 1;
 if( (q = strstr(url, "://") ) != NULL ) p = q + 3;
 q = strchr(p, ':');
 if(q == NULL) return 1;
+  ip_name = (char*)malloc(q-p+1);
 memcpy(ip_name, p, q - p); ip_name[q - p] = 0;
 if(p_ip_name != NULL) *p_ip_name = ip_name;
 if(socket != NULL) *socket = atoi(q+1);
@@ -529,7 +541,7 @@ if(q != NULL) {
 	while(*q == ' ') q++;
 	if(*q == 0) *p_remote_db = NULL;
 	else 	{
-		strcpy(remote_db, q);
+		remote_db = strdup(q);
 		*p_remote_db = remote_db;
 		}
 	}
@@ -538,38 +550,10 @@ return 0;
 }
 
 
-#define maxSUBINLNG 512
-static raa_db_access *init_raa_db_access(void)
-{
-raa_db_access *data;
-struct chain_void *elt;
-
-data = (raa_db_access *)calloc(1, sizeof(raa_db_access));
-elt = (struct chain_void *)malloc(sizeof(struct chain_void));
-if(data == NULL || elt == NULL) return NULL;
-data->rlng_buffer = (struct rlng *)malloc((maxSUBINLNG+1)*sizeof(int));
-if(data->rlng_buffer == NULL) return NULL;
-/* ajouter un elt a liste ds db ouvertes */
-elt->data = data;
-elt->next = raa_list_open_dbs;
-raa_list_open_dbs = elt;
-
-/* initialiser les champs non nuls */
-data->gfrag_data.l_nseq_buf = INT_MAX;
-data->nextelt_data.current_rank = -1;
-data->nextelt_data.previous = -2;
-data->readshrt_data.shrt_begin = S_BUF_SHRT - 1;
-#ifdef WIN32
-data->sock_input_pos = data->sock_input; data->sock_input_end = data->sock_input;
-#endif
-return data;
-}
-
-
 static int fill_gfrag_buf(raa_db_access *raa_current_db, int nsub, int first)
 {
 char *p, *line;
-int lu, l, length, wasfull;
+int lu, l, wasfull;
 
 sock_printf(raa_current_db,"gfrag&number=%d&start=%d&length=%d\n", nsub, first, RAA_GFRAG_BSIZE);
 /* retour:  length=xx&...the seq...\n */
@@ -578,7 +562,6 @@ if(line == NULL) return 0;
 if(strncmp(line, "length=", 7) != 0 || (p = strchr(line, '&')) == NULL ) {
 	return 0;
 	}
-length = atoi(line + 7);
 lu = strlen(++p);
 memcpy(raa_current_db->gfrag_data.buffer, p, lu);
 while(! wasfull) {
@@ -627,52 +610,6 @@ while(lfrag > lu) {
 	}
 dseq[lu] = 0;
 return lu;
-}
-
-
-void list_open_dbs_remove(raa_db_access *raa_current_db)
-/* enlever de liste des db ouvertes */
-{
-struct chain_void *elt, *elt2;
-int i;
-
-if(raa_current_db == NULL) return; /* should not happen */
-if(raa_current_db->dbname != NULL) free(raa_current_db->dbname);
-if(raa_current_db->rlng_buffer != NULL) free(raa_current_db->rlng_buffer);
-if(raa_current_db->readsub_data.name != NULL) free(raa_current_db->readsub_data.name);
-for(i = 0; i < raa_current_db->annot_data.annotcount; i++) 
-	free(raa_current_db->annot_data.annotline[i]);
-for(i = 0; i < BLOCK_ELTS_IN_LIST; i++) if(raa_current_db->nextelt_data.tabname[i] != NULL) 
-			free(raa_current_db->nextelt_data.tabname[i]);
-if(raa_current_db->readsmj_data.lastrec > 0) {
-		free(raa_current_db->readsmj_data.plongs);
-		for(i=2; i <= raa_current_db->readsmj_data.lastrec; i++) {
-			if(raa_current_db->readsmj_data.names[i] != NULL) free(raa_current_db->readsmj_data.names[i]);
-			if(raa_current_db->readsmj_data.libels[i] != NULL) free(raa_current_db->readsmj_data.libels[i]);
-			}
-		free(raa_current_db->readsmj_data.names); free(raa_current_db->readsmj_data.libels);
-		raa_current_db->readsmj_data.lastrec = 0;
-		}
-
-if(raa_list_open_dbs == NULL) return; /* should not happen */
-if(raa_list_open_dbs->data == raa_current_db) {
-	elt = raa_list_open_dbs;
-	raa_list_open_dbs = raa_list_open_dbs->next;
-	free(elt);
-	}
-else {
-	elt = raa_list_open_dbs;
-	while(elt->next != NULL) {
-		if(elt->next->data == raa_current_db) {
-			elt2 = elt->next;
-			elt->next = elt2->next;
-			free(elt2);
-			break;
-			}
-		elt = elt->next;
-		}
-	}
-free(raa_current_db);
 }
 
 
@@ -737,8 +674,30 @@ if(raa_current_db->sp_tree != NULL) {
 	raa_free_sp_tree(raa_current_db->sp_tree[2]);
 	free(raa_current_db->sp_tree);
 	}
-
-list_open_dbs_remove(raa_current_db);
+  if(raa_current_db->dbname != NULL) free(raa_current_db->dbname);
+  if(raa_current_db->rlng_buffer != NULL) free(raa_current_db->rlng_buffer);
+  if(raa_current_db->readsub_data.name != NULL) free(raa_current_db->readsub_data.name);
+  for(i = 0; i < raa_current_db->annot_data.annotcount; i++) 
+    free(raa_current_db->annot_data.annotline[i]);
+  for(i = 0; i < BLOCK_ELTS_IN_LIST; i++) if(raa_current_db->nextelt_data.tabname[i] != NULL) 
+    free(raa_current_db->nextelt_data.tabname[i]);
+  if(raa_current_db->readsmj_data.lastrec > 0) {
+    free(raa_current_db->readsmj_data.plongs);
+    for(i=2; i <= raa_current_db->readsmj_data.lastrec; i++) {
+      if(raa_current_db->readsmj_data.names[i] != NULL) free(raa_current_db->readsmj_data.names[i]);
+      if(raa_current_db->readsmj_data.libels[i] != NULL) free(raa_current_db->readsmj_data.libels[i]);
+    }
+    free(raa_current_db->readsmj_data.names); free(raa_current_db->readsmj_data.libels);
+    raa_current_db->readsmj_data.lastrec = 0;
+  }
+  raa_free_matchkeys(raa_current_db);
+  if (raa_current_db->full_line) free(raa_current_db->full_line);
+  if (raa_current_db->namestr) free(raa_current_db->namestr);
+  if (raa_current_db->help) free(raa_current_db->help);
+  if (raa_current_db->tmp_prelist) free(raa_current_db->tmp_prelist);
+  if (raa_current_db->translate_buffer) free(raa_current_db->translate_buffer);
+  
+  free(raa_current_db);
 }
 
 
@@ -804,7 +763,7 @@ static char *raa_requete_remote_file(raa_db_access *raa_current_db, char *oldreq
 
 int raa_proc_query(raa_db_access *raa_current_db, char *requete, char **message, 
 	char *nomliste, int *numlist, int *count, int *locus, int *type) {
-  char *reponse, *code, *numlistchr, *countchr, *locuschr, *typechr, *badfname;
+  char *reponse, *code, *numlistchr, *countchr, *locuschr, *typechr, *badfname, *p;
   int codret, *tmp_blists;
   Reponse *rep;
   
@@ -812,14 +771,15 @@ if(raa_current_db == NULL) return -1;
   requete = raa_requete_remote_file(raa_current_db, requete, &tmp_blists, &badfname);
   if(requete == NULL) {
   	if(message != NULL) {
-  		static char fmt[] = "problem accessing file: %s";
+		char fmt[] = "problem accessing file: %s";
   		*message = (char *)malloc(strlen(fmt) + strlen(badfname) + 1);
   		sprintf(*message, fmt, badfname);
   		}
   	return 1;
   	}
-  sock_printf(raa_current_db,"proc_query&query=\"%s\"&name=\"%s\"\n", 
-  	protect_quotes(requete), nomliste);
+  p = protect_quotes(requete);
+  sock_printf(raa_current_db,"proc_query&query=\"%s\"&name=\"%s\"\n", p, nomliste);
+  free(p);
   free(requete);
   reponse=read_sock(raa_current_db);
   if(reponse == NULL) {
@@ -944,9 +904,8 @@ return val;
 }
 
 
-char *print_raa_long(raa_long val)
+char *print_raa_long(raa_long val, char *buffer)
 {
-static char buffer[50];
 sprintf(buffer, RAA_LONG_FORMAT, val);
 return buffer;
 }
@@ -1000,7 +959,7 @@ char *raa_read_annots(raa_db_access *raa_current_db, raa_long faddr, int div)
 {
   int i;
   raa_long debut;
-  char *p;
+  char *p, buffer[40];
 
 if(raa_current_db == NULL) return NULL;
   if(raa_current_db->annot_data.annotcount > 0 && 
@@ -1019,7 +978,7 @@ if(raa_current_db == NULL) return NULL;
   		} 
 	}
   sock_printf(raa_current_db,"read_annots&offset=%s&div=%d&nl=%d\n", 
-  		print_raa_long(faddr), div, ANNOTCOUNT);
+  		print_raa_long(faddr, buffer), div, ANNOTCOUNT);
   p = load_annots_buf(raa_current_db, faddr, div, FALSE);
   return p;
 }
@@ -1054,8 +1013,9 @@ char *reponse, *p;
 int val;
 
 if(raa_current_db == NULL) return 0;
-  sock_printf(raa_current_db,"iknum&name=\"%s\"&type=%s\n", protect_quotes(name), 
-  	(cas == raa_key ? "KW" : "SP") );
+  p = protect_quotes(name);
+  sock_printf(raa_current_db,"iknum&name=\"%s\"&type=%s\n", p, (cas == raa_key ? "KW" : "SP") );
+  free(p);
   reponse = read_sock(raa_current_db);
   if(reponse == NULL) return 0;
   p = strchr(reponse, '=');
@@ -1072,7 +1032,9 @@ char *reponse, *p;
 int val;
 
 if(raa_current_db == NULL) return 0;
-  sock_printf(raa_current_db,"isenum&name=\"%s\"\n", protect_quotes(name) );
+  p = protect_quotes(name);
+  sock_printf(raa_current_db,"isenum&name=\"%s\"\n", p );
+  free(p);
   reponse = read_sock(raa_current_db);
   if(reponse == NULL) return 0;
   p = strchr(reponse, '=');
@@ -1173,11 +1135,9 @@ else  strcpy(str_type, "SP");
 
 
 char *raa_getliststate(raa_db_access *raa_current_db, int lrank, int *locus, int *type, int *count)
-/* list name is returned in static memory */
 {
   Reponse *rep;
   char *reponse, *code, *countstr, *locusstr, *typestr, *retp = NULL;
-  static char *namestr = NULL;
   
 if(raa_current_db == NULL) return NULL;
   rep=initreponse();
@@ -1193,8 +1153,8 @@ if(raa_current_db == NULL) return NULL;
   		else if(strcmp(typestr, "KW") == 0) *type = 'K';
   		else *type = 'E';
   		}
-  	if(namestr != NULL) free(namestr); /* allocation precedante */
-  	namestr = val(rep, "name");
+  	if(raa_current_db->namestr != NULL) free(raa_current_db->namestr); /* allocation precedante */
+  	raa_current_db->namestr = val(rep, "name");
   	countstr = val(rep, "count");
 	if(count != NULL) *count = atoi(countstr);
   	locusstr = val(rep, "locus");
@@ -1202,7 +1162,7 @@ if(raa_current_db == NULL) return NULL;
 	free(countstr); 
 	free(locusstr); 
 	free(typestr); 
-	retp = namestr;
+	retp = raa_current_db->namestr;
   	}
   if(code != NULL) free(code);
   clear_reponse(rep);
@@ -1214,7 +1174,6 @@ char *raa_residuecount(raa_db_access *raa_current_db, int lrank)
 {
 Reponse *rep;
 char *reponse, *code;
-static char total[30];
 
 if(raa_current_db == NULL) return 0;
   rep=initreponse();
@@ -1223,29 +1182,31 @@ if(raa_current_db == NULL) return 0;
   if(reponse == NULL) return 0;
   parse(reponse, rep);
   code = val(rep,"code");
-  strcpy(total, "0");
+  strcpy(raa_current_db->residuecount, "0");
   if(code != NULL && *code == '0') {
 	free(code);
   	code = val(rep,"count");
  	if(code != NULL) {
-		strcpy(total, code);
+		strcpy(raa_current_db->residuecount, code);
 		free(code);
 		}
 	}
 clear_reponse(rep);
-return total;
+return raa_current_db->residuecount;
 }
 
 
 int raa_getemptylist(raa_db_access *raa_current_db, char *name)
 {
   Reponse *rep;
-  char *reponse, *code, *rankstr;
+  char *reponse, *code, *rankstr, *p;
   int rank = 0;
   
 if(raa_current_db == NULL) return 0;
   rep=initreponse();
-  sock_printf(raa_current_db, "getemptylist&name=\"%s\"\n", protect_quotes(name));
+  p = protect_quotes(name);
+  sock_printf(raa_current_db, "getemptylist&name=\"%s\"\n", p);
+  free(p);
   reponse=read_sock(raa_current_db);
   if(reponse == NULL) return 0;
   parse(reponse, rep);
@@ -1393,7 +1354,9 @@ else if(cas == raa_acc) strcpy(type, "ACC");
 else if(cas == raa_smj) strcpy(type, "SMJ");
 else if(cas == raa_sub) strcpy(type, "SUB");
 else return 0;
-  sock_printf(raa_current_db,"fcode&name=\"%s\"&type=%s\n", protect_quotes(name), type );
+  p = protect_quotes(name);
+  sock_printf(raa_current_db,"fcode&name=\"%s\"&type=%s\n", p, type );
+  free(p);
   reponse = read_sock(raa_current_db);
   if(reponse == NULL) return 0;
   p = strchr(reponse, '=');
@@ -1551,7 +1514,6 @@ char *raa_readloc(raa_db_access *raa_current_db, int num, int *sub, int *pnuc, i
   Reponse *rep;
   char *p, *reponse;
   int code;
-  static char date[50];
 
 if(raa_current_db == NULL) return NULL;
   rep=initreponse();
@@ -1605,9 +1567,9 @@ if(raa_current_db == NULL) return NULL;
   		free(p);
   		}
   	p = val(rep, "date");
-  	strcpy(date, p);
+  	strcpy(raa_current_db->date, p);
   	free(p);
-  	p = date;
+  	p = raa_current_db->date;
   	}
   else p = NULL;
   clear_reponse(rep);
@@ -1803,7 +1765,6 @@ char *raa_readacc(raa_db_access *raa_current_db, int num, int *plsub)
   Reponse *rep;
   char *p, *reponse;
   int code;
-  static char name[100];
 
 if(raa_current_db == NULL) return NULL;
   rep=initreponse();
@@ -1822,9 +1783,9 @@ if(raa_current_db == NULL) return NULL;
   		free(p);
   		}
   	p = val(rep, "name");
-  	strcpy(name, p);
+  	strcpy(raa_current_db->access, p);
   	free(p);
-  	p = name;
+  	p = raa_current_db->access;
   	}
   else p = NULL;
   clear_reponse(rep);
@@ -1962,6 +1923,54 @@ return raa_readshrt(raa_current_db, point, pval);
 }
 
 
+static void load_shrt2_aux(raa_db_access *raa_current_db, unsigned point, raa_shortl2_kind kind)
+{
+  static const char kind_name[][11] = {"sub_of_bib", "spc_of_loc", "bib_of_loc", "aut_of_bib", "bib_of_aut",
+    "sub_of_acc", "key_of_sub", "acc_of_loc"};
+  char *p, *reponse;
+  int i;
+  
+  if (raa_current_db == NULL) return;
+  sock_printf(raa_current_db, "followshrt2&num=%u&kind=%s&rank=0&max=%d\n", point, kind_name[kind], 
+              raa_current_db->readshrt2_data[kind]->size);
+  /* reponse is:  code=0&num=xx&rank=xx&n=xx&val,.... n times ...\n  */
+  reponse = read_sock(raa_current_db);
+  
+  if (reponse == NULL || strncmp(reponse, "code=0&", 7) != 0) {
+    return;
+  }
+  raa_current_db->readshrt2_data[kind]->point = point;
+  p = strstr(reponse, "num=");
+  raa_current_db->readshrt2_data[kind]->next = atoi(p + 4);
+  p = strstr(reponse, "n=");
+  raa_current_db->readshrt2_data[kind]->length = atoi(p + 2);
+  p = strchr(p, '&') + 1;
+  for (i = 0; i < raa_current_db->readshrt2_data[kind]->length; i++) {
+    sscanf(p, "%u", raa_current_db->readshrt2_data[kind]->vals+i);
+    p = strchr(p, ',') + 1;
+  }
+}
+
+
+unsigned raa_followshrt2(raa_db_access *raa_current_db, int *p_point, int *p_rank, raa_shortl2_kind kind)
+{
+  int rank = *p_rank;
+  unsigned retval;
+  
+  if (raa_current_db->readshrt2_data[kind]->point == *p_point &&
+      rank < raa_current_db->readshrt2_data[kind]->length) {
+    retval = raa_current_db->readshrt2_data[kind]->vals[rank++];
+    if (rank >= raa_current_db->readshrt2_data[kind]->length) {
+      *p_rank = 0;
+      *p_point = raa_current_db->readshrt2_data[kind]->next;
+    }
+    else *p_rank = rank;
+    return retval;
+  }
+  load_shrt2_aux(raa_current_db, *p_point, kind);
+  return raa_followshrt2(raa_current_db, p_point, p_rank, kind);
+}
+
 
 char *raa_ghelp(raa_db_access *raa_current_db, char *fname, char *topic)
 /* returns all help topic in one string in private memory
@@ -1969,8 +1978,6 @@ char *raa_ghelp(raa_db_access *raa_current_db, char *fname, char *topic)
 {
 char *reponse, *p, *fintext, *tmp;
 int nl, l, i;
-static char *text = NULL;
-static int ltext = 0;
 
 if(raa_current_db == NULL) return NULL;
   sock_printf(raa_current_db,"ghelp&file=%s&item=%s\n", fname, topic);
@@ -1980,19 +1987,19 @@ if(raa_current_db == NULL) return NULL;
   if(strncmp(reponse, "nl=", 3) == 0) nl = atoi(reponse+3);
   p = strchr(reponse, '&');
   if(nl <= 0 || p == NULL) return NULL;
-  fintext = text; p++;
+  fintext = raa_current_db->help; p++;
   for(i = 0; i < nl; i++) {
   	l = strlen(p) + 1; /* +1 pour ajouter \n */
-  	if( (fintext - text) + l > ltext) {
-  		ltext += 1000;
-  		tmp = (char *)realloc(text, ltext + 1);
+  	if( (fintext - raa_current_db->help) + l > raa_current_db->lhelp) {
+  		raa_current_db->lhelp += 1000;
+  		tmp = (char *)realloc(raa_current_db->help, raa_current_db->lhelp + 1);
   		if(tmp == NULL) {
-  			if(text != NULL) free(text);
-  			text = NULL; ltext = 0;
+  			if(raa_current_db->help != NULL) free(raa_current_db->help);
+  			raa_current_db->help = NULL; raa_current_db->lhelp = 0;
   			return NULL;
   			}
-  		fintext = tmp + (fintext - text);
-  		text = tmp;
+  		fintext = tmp + (fintext - raa_current_db->help);
+  		raa_current_db->help = tmp;
   		}
   	memcpy(fintext, p, l -1);
   	fintext += l;
@@ -2002,7 +2009,7 @@ if(raa_current_db == NULL) return NULL;
   	p = reponse;
   	}
   *fintext = 0;
-  return text;	
+  return raa_current_db->help;	
 }
 
 
@@ -2040,7 +2047,9 @@ struct raa_matchkey *data;
 if(raa_current_db == NULL) return;
 raa_free_matchkeys(raa_current_db);
 sock_printf(raa_current_db, "nextmatchkey&num=%d", num );
-if(num == 2) sock_printf(raa_current_db, "&pattern=\"%s\"", protect_quotes(pattern) );
+  p = protect_quotes(pattern);
+if(num == 2) sock_printf(raa_current_db, "&pattern=\"%s\"", p );
+  free(p);
 sock_printf(raa_current_db, "&count=%d\n", blocksize);
 reponse = read_sock(raa_current_db);
 if(reponse == NULL || strncmp(reponse, "code=0&count=", 13) != 0) return;
@@ -2076,7 +2085,7 @@ int raa_nextmatchkey(raa_db_access *raa_current_db, int num, char *pattern, char
 /*  *matching returned in static memory */
 {
 struct raa_matchkey *data;
-int no_more, count;
+int no_more=0, count;
 
 if(raa_current_db == NULL) return 0;
 if(num == 2) {
@@ -2108,26 +2117,21 @@ return (int)value;
 }
 
 
-char *protect_quotes(char *name)
+static char *protect_quotes(char *name)
 /* remplacer tous les " par \"
 name : une chaine inchangee
-retourne un pointeur vers la chaine rendue privee pour cette fonction
+retourne un pointeur vers la chaine rendue allouee par malloc
 */
 {
 char *p, *q;
-int l, count;
-static char *bis = NULL;
-static int lbis = 0;
+int count;
+char *bis;
 
 count = 0; p = name - 1;
 while( (p=strchr(p+1, '"')) != NULL) count++;
-if(count == 0) return name;
+if(count == 0) return strdup(name);
 
-l = strlen(name);
-if(l + count > lbis) {
-	lbis = l + count;
-	bis = (char *)realloc(bis, lbis + 1);
-	}
+bis = (char *)malloc(strlen(name) + count + 1);
 p = name; q = bis;
 while(TRUE) {
 	if(*p == '"') *(q++) = '\\';
@@ -2143,7 +2147,7 @@ static char *prepare_remote_file(raa_db_access *raa_current_db, char *oldrequete
 	char **badfname)
 {
 char *p, *q, *reponse, *fin;
-static char line[200];
+char *line = raa_current_db->remote_file;
 int nl, l, code;
 FILE *in;
 Reponse *rep;
@@ -2162,17 +2166,17 @@ else	{
 	do ++fin; while( *fin != 0 && *fin != ')' && !isspace(*fin) );
 	}
 l = fin - p;
-if(l >= sizeof(line)) l = sizeof(line) - 1;
+if(l >= sizeof(raa_current_db->remote_file)) l = sizeof(raa_current_db->remote_file) - 1;
 memcpy(line, p, l); line[l] = 0;
-if(fin - p >= sizeof(line)) return NULL;
+if(fin - p >= sizeof(raa_current_db->remote_file)) return NULL;
 in = fopen(line, "r");
 if(in == NULL) return NULL;
 nl = 0;
-while( fgets(line, sizeof(line), in) != NULL) nl++;
+while( fgets(line, sizeof(raa_current_db->remote_file), in) != NULL) nl++;
 rewind(in);
 sock_printf(raa_current_db, "crelistfromclientdata&type=%s&nl=%d\n", type, nl);
 if(nl > 0) {
-	while( fgets(line, sizeof(line), in) != NULL) {
+	while( fgets(line, sizeof(raa_current_db->remote_file), in) != NULL) {
 		l = strlen(line);
 		if(line[l - 1] != '\n')  strcpy(line + l, "\n");
 		sock_fputs(raa_current_db, line);
@@ -2219,46 +2223,37 @@ return reponse;
 }
 
 
-static int *add_tmp_blist(int lrank, int *list)
+static int *add_tmp_blist(raa_db_access *raa_current_db, int lrank, int *list)
 {
-static int total = 0, current, *prelist = NULL; /* need not be specific to each opened db */
-
 if(list == NULL) { /* initialisation */
-	if(prelist != NULL) free(prelist);
-	total = 10; current = 0;
-	list = (int *)malloc(total*sizeof(int));
-	prelist = list;
+	if(raa_current_db->tmp_prelist != NULL) free(raa_current_db->tmp_prelist);
+	raa_current_db->tmp_total = 10; raa_current_db->tmp_current = 0;
+	list = (int *)malloc(raa_current_db->tmp_total*sizeof(int));
+	raa_current_db->tmp_prelist = list;
 	return list;
 	}
-if(current >= total) {
+if(raa_current_db->tmp_current >= raa_current_db->tmp_total) {
 	int *tmp;
-	tmp = (int *)realloc(list, (total + 10)*sizeof(int));
+	tmp = (int *)realloc(list, (raa_current_db->tmp_total + 10)*sizeof(int));
 	if(tmp == NULL) return list;
-	total += 10;
+	raa_current_db->tmp_total += 10;
 	list = tmp;
 	}
-list[current++] = lrank;
-prelist = list;
+list[raa_current_db->tmp_current++] = lrank;
+raa_current_db->tmp_prelist = list;
 return list;
 }
 
 
-char *maj_strstr(char *in, char *target)
+static char *maj_strstr(char *in, char *target)
 {
-static char *buffer = NULL;
-static int lbuf = 0;
-int l;
-char *p;
+char *p, *buffer;
 
-l = strlen(in);
-if(l > lbuf) {
-	lbuf = l;
-	buffer = (char *)realloc(buffer, lbuf + 1);
-	}
-strcpy(buffer, in);
+  buffer = strdup(in);
 majuscules(buffer);
 p = strstr(buffer, target);
 if(p != NULL) p = in + (p - buffer);
+  free(buffer);
 return p;
 }
 
@@ -2278,24 +2273,24 @@ if(maj_strstr(oldori, "F=") == NULL && maj_strstr(oldori, "FA=") == NULL &&
 	*plist = NULL;
 	return oldori;
 	}
-list = add_tmp_blist(0, NULL); /* initialisation a vide */
+list = add_tmp_blist(raa_current_db, 0, NULL); /* initialisation a vide */
 while(oldori != NULL && (p = maj_strstr(oldori, "F=")) != NULL) {
 	oldori = prepare_remote_file(raa_current_db, oldori, p, "SQ", &lrank, pbadfname);
-	if(lrank != 0) list = add_tmp_blist(lrank, list);
+	if(lrank != 0) list = add_tmp_blist(raa_current_db, lrank, list);
 	}
 while(oldori != NULL && (p = maj_strstr(oldori, "FA=")) != NULL) {
 	oldori = prepare_remote_file(raa_current_db, oldori, p, "AC", &lrank, pbadfname);
-	if(lrank != 0) list = add_tmp_blist(lrank, list);
+	if(lrank != 0) list = add_tmp_blist(raa_current_db, lrank, list);
 	}
 while(oldori != NULL && (p = maj_strstr(oldori, "FS=")) != NULL) {
 	oldori = prepare_remote_file(raa_current_db, oldori, p, "SP", &lrank, pbadfname);
-	if(lrank != 0) list = add_tmp_blist(lrank, list);
+	if(lrank != 0) list = add_tmp_blist(raa_current_db, lrank, list);
 	}
 while(oldori != NULL && (p = maj_strstr(oldori, "FK=")) != NULL) {
 	oldori = prepare_remote_file(raa_current_db, oldori, p, "KW", &lrank, pbadfname);
-	if(lrank != 0) list = add_tmp_blist(lrank, list);
+	if(lrank != 0) list = add_tmp_blist(raa_current_db, lrank, list);
 	}
-list = add_tmp_blist(0, list); /* marquage fin de liste par zero */
+list = add_tmp_blist(raa_current_db, 0, list); /* marquage fin de liste par zero */
 if(oldori == NULL && list != NULL) {
  	 while(*list != 0) raa_releaselist(raa_current_db,  *(list++) );
  	 list = NULL;
@@ -2462,7 +2457,7 @@ if(strchr(name, '.') != NULL) { /* subsequence */
 				!strncmp(p,"FT        ",10) );
 	}
 else	{ /* parent sequence */
-	if( (p = raa_read_annots(raa_current_db, pinf, div)) == NULL) return text;
+	if( raa_read_annots(raa_current_db, pinf, div) == NULL) return text;
 	p = raa_next_annots(raa_current_db, NULL);
 	if(raa_current_db->nbrf) {
 		deb=17;
@@ -2485,12 +2480,6 @@ else	{ /* parent sequence */
 	while( !strncmp(p,"  ",2) || !strncmp(p,"DE",2) );
 	}
 return text;
-}
-
-
-struct chain_void *raa_get_list_open_dbs(void)
-{
-return raa_list_open_dbs;
 }
 
 
@@ -2660,47 +2649,40 @@ rendue dans memoire allouee ici qu'il ne faut pas modifier
 retour NULL si pb lecture de la seq
 */
 {
-static char *buffer = NULL;
-static int lbuffer = 0;
 int debut_codon, longueur, pos, code, phase;
 char codon[4], *p;
 
 raa_readsub(raa_current_db, seqnum,&longueur,NULL,NULL,NULL,NULL,&phase,&code);
 debut_codon = phase + 1;
 longueur = (longueur - debut_codon + 1)/3;
-if(longueur > lbuffer) {
-	if(buffer != NULL) free(buffer);
-	buffer = (char *)malloc(longueur + 1);
-	lbuffer = longueur;
-	}
-if(buffer == NULL) {lbuffer = 0; return NULL; }
-buffer[0] = raa_translate_init_codon(raa_current_db, seqnum);
+  raa_current_db->translate_buffer = (char*)realloc(raa_current_db->translate_buffer, longueur + 1);
+if(raa_current_db->translate_buffer == NULL) { return NULL; }
+raa_current_db->translate_buffer[0] = raa_translate_init_codon(raa_current_db, seqnum);
 debut_codon += 3;
 for(pos = 1; pos < longueur; pos++) {
 	if( raa_gfrag(raa_current_db, seqnum, debut_codon, 3, codon) == 0) return NULL;
-	buffer[pos] = codaa(codon,code);
+	raa_current_db->translate_buffer[pos] = codaa(codon,code);
 	debut_codon += 3;
 	}
-buffer[longueur] = 0;
-while( (p = strchr(buffer, '*') ) != NULL && p - buffer < longueur - 1 )
+raa_current_db->translate_buffer[longueur] = 0;
+while( (p = strchr(raa_current_db->translate_buffer, '*') ) != NULL && p - raa_current_db->translate_buffer < longueur - 1 )
 	*p = 'X';
-return buffer;
+return raa_current_db->translate_buffer;
 }
 
 
 char raa_translate_init_codon(raa_db_access *raa_current_db, int numseq)
 {
 char codon[4];
-int point, special_init = TRUE, val, gc, phase;
-static int num_5_partial = 0;
+int point, special_init = TRUE, val, gc, phase, rank = 0;
 
-if(num_5_partial == 0) num_5_partial = raa_iknum(raa_current_db, "5'-PARTIAL", raa_key);
+if (raa_current_db->num_5_partial == 0) raa_current_db->num_5_partial = raa_iknum(raa_current_db, "5'-PARTIAL", raa_key);
 raa_readsub(raa_current_db, numseq, NULL, NULL,NULL, &point, NULL, &phase, &gc);
 if(phase != 0) special_init = FALSE;
 else	{ /* la seq est-elle 5'-PARTIAL ? */
-	while(point != 0) {
-		point = raa_readshrt(raa_current_db, point, &val);
-		if(val == num_5_partial) {
+	while (point != 0) {
+		val = raa_followshrt2(raa_current_db, &point, &rank, raa_key_of_sub);
+		if (val == raa_current_db->num_5_partial) {
 			special_init = FALSE;
 			break;
 			}
@@ -2754,11 +2736,11 @@ static void ajout_branche(raa_node *pere, raa_node *fils)
 /* adds a pere->fils branch. The last added branch is the first child of pere.
  */
 {
-struct raa_pair *point, *nouveau;
+struct raa_pair *nouveau;
 
 nouveau = (struct raa_pair *)calloc(1,sizeof(struct raa_pair));
 nouveau->value = fils;
-if( (point = pere->list_desc) == NULL) {
+if( pere->list_desc == NULL) {
 	pere->list_desc = nouveau;
 	}
 else	{
@@ -2984,7 +2966,7 @@ return raa_current_db->sp_tree[rank]->name;
 }
 
 
-char *raa_getattributes_both(raa_db_access *raa_current_db, const char *id, int rank,
+static char *raa_getattributes_both(raa_db_access *raa_current_db, const char *id, int rank,
 	int *prank, int *plength, int *pframe, int *pgc, char **pacc, char **pdesc, char **pspecies, char **pseq)
 /*
 for a sequence identified by name or acc. no. (id != NULL) or by rank
@@ -2998,7 +2980,6 @@ prank, plength, pframe, pgc, pacc, pdesc, pspecies, pseq can be NULL is no such 
 Reponse *rep;
 char *p, *reponse;
 int err;
-static char mnemo[WIDTH_MAX], species[WIDTH_MAX], access[WIDTH_MAX], descript[WIDTH_MAX];
 
 if(raa_current_db == NULL) return NULL;
 if(id != NULL) sock_printf(raa_current_db, "getattributes&id=%s&seq=%c\n", id, pseq == NULL ? 'F' : 'T');
@@ -3040,27 +3021,27 @@ if(err == 0) {
 		else *pgc = 0;
 		}
 	p = val(rep, "name");
-	strcpy(mnemo, p);
+	strcpy(raa_current_db->mnemo, p);
 	free(p);
 	if(pacc != NULL) {
 		p = val(rep, "acc");
-		strcpy(access, p);
+		strcpy(raa_current_db->access, p);
 		free(p);
-		*pacc = access;
+		*pacc = raa_current_db->access;
 		}
 	if(pspecies != NULL) {
 		p = val(rep, "spec");
-		strcpy(species, p);
+		strcpy(raa_current_db->species, p);
 		free(p);
-		*pspecies = species;
-		p = species;
+		*pspecies = raa_current_db->species;
+		p = raa_current_db->species;
 		while(*(++p) != 0) *p = tolower(*p);
 		}
 	if(pdesc != NULL) {
 		p = val(rep, "descr");
-		strcpy(descript, p);
+		strcpy(raa_current_db->descript, p);
 		free(p);
-		*pdesc = descript;
+		*pdesc = raa_current_db->descript;
 		}
 	if(pseq != NULL) {
 		*pseq = read_sock(raa_current_db); 
@@ -3071,7 +3052,7 @@ if(err == 0) {
 	err = 0;
 	}
 clear_reponse(rep);
-return (err ? NULL : mnemo);
+return (err ? NULL : raa_current_db->mnemo);
 }
 
 

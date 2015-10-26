@@ -71,6 +71,14 @@ struct readshrt_aux {
 	 int shrt_max, shrt_begin, total;
 	};
 
+typedef struct shrt2_list {
+  int length;
+  int size;
+  unsigned point;
+  unsigned next;
+  unsigned vals[1];
+} shrt2_list;
+
 struct readsmj_aux {
 	 int lastrec;
 	 char **names, **libels;
@@ -93,12 +101,17 @@ struct raa_pair {
 	struct raa_pair *next;
 	};
 
+#define WIDTH_MAX 150
+
+typedef enum { raa_sub_of_bib = 0, raa_spec_of_loc, raa_bib_of_loc, raa_aut_of_bib, raa_bib_of_aut,
+  raa_sub_of_acc, raa_key_of_sub, raa_acc_of_loc } raa_shortl2_kind;
+
 typedef struct _raa_db_access {
 	char *dbname;
 	FILE *raa_sockfdr, *raa_sockfdw;
 	int genbank, embl, swissprot, nbrf;
 	int nseq, longa, maxa;
-	int L_MNEMO, WIDTH_SP, WIDTH_KW, WIDTH_SMJ, WIDTH_AUT, WIDTH_BIB, ACC_LENGTH, SUBINLNG, lrtxt;
+	int L_MNEMO, WIDTH_SP, WIDTH_KW, WIDTH_SMJ, WIDTH_AUT, WIDTH_BIB, ACC_LENGTH, SUBINLNG, lrtxt, VALINSHRT2;
 	raa_node **sp_tree; /* NULL or the full taxonomy tree */
 	int max_tid; /* largest correct taxon ID value */
 	int *tid_to_rank; /* NULL or tid-to-rank table */
@@ -110,6 +123,7 @@ typedef struct _raa_db_access {
 	struct readsp_kw_aux readspec_data, readkey_data;
 	struct nextelt_aux nextelt_data;
 	struct readshrt_aux readshrt_data;
+	struct shrt2_list *readshrt2_data[raa_acc_of_loc+1];
 	struct readsmj_aux readsmj_data;
 	void *matchkey_data;
 	/* mostly for raa_query/raa_query_win usage */
@@ -122,28 +136,42 @@ typedef struct _raa_db_access {
 	char sock_output[SOCKBUFS]; /* WIN32 socket output buffer */
 	DWORD sock_output_lbuf;
 #endif
+  char buffer[5000];
+  char remote_file[300];
+  char *full_line;
+  int max_full_line;
+  int was_here;
+  char *namestr;
+  char residuecount[30];
+  char *help;
+  int lhelp;
+  int tmp_total;
+  int tmp_current;
+  int *tmp_prelist;
+  char *translate_buffer;
+  int num_5_partial;
+  char mnemo[WIDTH_MAX];
+  char species[WIDTH_MAX];
+  char access[WIDTH_MAX];
+  char descript[WIDTH_MAX];
+  char date[12];
 	} raa_db_access;
 
-#define WIDTH_MAX 150
 
 typedef enum { raa_sub = 0, raa_loc, raa_key, raa_spec, raa_shrt, raa_lng, raa_ext, raa_smj,
 	raa_aut, raa_bib, raa_txt, raa_acc } raa_file;
 typedef void (*raa_char_void_function)(raa_db_access *, char *);
-struct chain_void {
-	void *data;
-	struct chain_void *next;
-	};
 
 /* global variables */
 extern raa_char_void_function raa_error_mess_proc;/*this function sd call raa_acnucclose*/
 
 
-extern int raa_acnucopen (char *clientid, raa_db_access **psock) ;
+extern int raa_acnucopen (const char *clientid, raa_db_access **psock) ;
 extern int raa_decode_address(char *url, char **p_ip_name, int *socket, char **p_remote_db);
-extern int raa_acnucopen_alt (char *serveurName, int port, char *db_name, char *clientid, raa_db_access **psock);
-extern int raa_open_socket(char *serveurName, int port, char *clientid, raa_db_access **psock);
-extern int raa_opendb(raa_db_access *raa_current_db, char *db_name);
-int raa_opendb_pw(raa_db_access  *raa_current_db, char *db_name, void *ptr, char *(*getpasswordf)(void *) );
+extern int raa_acnucopen_alt (const char *serveurName, int port, const char *db_name, const char *clientid, raa_db_access **psock);
+extern int raa_open_socket(const char *serveurName, int port, const char *clientid, raa_db_access **psock);
+extern int raa_opendb(raa_db_access *raa_current_db, const char *db_name);
+int raa_opendb_pw(raa_db_access  *raa_current_db, const char *db_name, void *ptr, char *(*getpasswordf)(void *) );
 extern int raa_gfrag(raa_db_access  *raa_current_db, int nsub, int first, int lfrag, char *dseq) ;
 extern void raa_acnucclose(raa_db_access  *raa_current_db) ;
 extern int raa_prep_acnuc_query(raa_db_access  *raa_current_db) ; 
@@ -154,7 +182,7 @@ int raa_nexteltinlist_annots(raa_db_access  *raa_current_db, int first, int lran
 	raa_long *paddr, int *pdiv);
 raa_long scan_raa_long(char *txt);
 int raa_seq_to_annots(raa_db_access  *raa_current_db, int numseq, raa_long *faddr, int *div);
-char *print_raa_long(raa_long val);
+char *print_raa_long(raa_long val, char *buffer);
 char *raa_read_annots(raa_db_access  *raa_current_db, raa_long faddr, int div);
 char *raa_next_annots(raa_db_access  *raa_current_db, raa_long *faddr);
 char *raa_translate_cds(raa_db_access  *raa_current_db, int seqnum);
@@ -191,6 +219,7 @@ char *raa_readacc(raa_db_access  *raa_current_db, int num, int *plsub);
 int raa_readext(raa_db_access  *raa_current_db, int num, int *mere, int *deb, int *fin);
 int raa_readlng(raa_db_access  *raa_current_db, int num);
 unsigned raa_readshrt(raa_db_access  *raa_current_db, unsigned point, int *val);
+unsigned raa_followshrt2(raa_db_access *raa_current_db, int *p_point, int *p_rank, raa_shortl2_kind kind);
 char *raa_ghelp(raa_db_access  *raa_current_db, char *fname, char *topic);
 int raa_nextmatchkey(raa_db_access  *raa_current_db, int num, char *pattern, char **matching);
 int raa_savelist(raa_db_access  *raa_current_db, int lrank, FILE *out, int use_acc, char *prefix);
@@ -198,7 +227,6 @@ int raa_modifylist(raa_db_access  *raa_current_db, int lrank, char *type /* "len
 	int *pnewlrank, int (*check_interrupt)(void) , int *p_processed);
 int raa_knowndbs(raa_db_access  *raa_current_db, char ***pnames, char ***pdescriptions);
 char *raa_short_descr(raa_db_access  *raa_current_db, int seqnum, char *text, int maxlen, raa_long pinf, int div, char *name);
-struct chain_void *raa_get_list_open_dbs(void);
 void *raa_prep_extract(raa_db_access *raa_current_db, char *format, FILE *outstream, char *choix,
 	 char *feature_name, char *bornes, char *min_bornes, char **message, int lrank);
 int raa_extract_1_seq(void *opaque);
@@ -217,7 +245,7 @@ char *raa_getattributes(raa_db_access *raa_current_db, const char *id,
 char *raa_seqrank_attributes(raa_db_access *raa_current_db, int rank,
 	int *plength, int *pframe, int *pgc, char **pacc, char **pdesc, char **pspecies, char **pseq);
 
-int sock_fputs(raa_db_access  *raa_current_db, char *line);
+int sock_fputs(raa_db_access  *raa_current_db, const char *line);
 int sock_flush(raa_db_access  *raa_current_db);
 char *read_sock(raa_db_access  *raa_current_db);
 
@@ -225,7 +253,6 @@ char *read_sock(raa_db_access  *raa_current_db);
 int trim_key(char *name); /* remove trailing spaces */
 void majuscules(char *name);
 int atoi_u(const char *p);
-char *protect_quotes(char *name); /* replace " by \" returns in static memory */
 void compact(char *chaine);
 int strcmptrail(char *s1, int l1, char *s2, int l2);
 
