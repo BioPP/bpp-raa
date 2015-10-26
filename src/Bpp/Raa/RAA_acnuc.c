@@ -16,7 +16,7 @@
 #elif defined(WIN32)
 #include <Winsock2.h>
 #include <Ws2tcpip.h>
-#include <Wspiapi.h>
+//#include <Wspiapi.h>
 #endif
 
 

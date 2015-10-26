@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 #if defined(WIN32)
+#define _WIN32_WINNT  0x0501
 #define SOCKBUFS 8192
 #include <winsock2.h>
 #endif
