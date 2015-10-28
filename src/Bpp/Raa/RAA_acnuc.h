@@ -6,9 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 #if defined(WIN32)
-#define _WIN32_WINNT  0x0501
 #define SOCKBUFS 8192
-#include <winsock2.h>
 #endif
 #ifdef __alpha
 typedef long raa_long;
@@ -135,7 +133,7 @@ typedef struct _raa_db_access {
 	char sock_input[SOCKBUFS]; /* WIN32 socket input buffer */
 	char *sock_input_pos, *sock_input_end;
 	char sock_output[SOCKBUFS]; /* WIN32 socket output buffer */
-	DWORD sock_output_lbuf;
+	unsigned sock_output_lbuf;
 #endif
   char buffer[5000];
   char remote_file[300];
