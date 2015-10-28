@@ -14,7 +14,9 @@
 #include <sys/time.h>
 #include <termios.h>
 #elif defined(WIN32)
+#if _WIN32_WINNT < 0x0501
 #define _WIN32_WINNT  0x0501
+#endif
 #include <Winsock2.h>
 #include <Ws2tcpip.h>  // for getaddrinfo, freeaddrinfo, struct addrinfo
 //#include <Wspiapi.h>
