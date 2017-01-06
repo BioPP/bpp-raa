@@ -107,18 +107,24 @@ int RAA::getSeqFrag(const string &name_or_accno, int first, int length, string &
 
 RaaSeqAttributes *RAA::getAttributes(const string &name_or_accno)
 {
-	char *description, *species, *access;
-	int acnuc_gc;
-	RaaSeqAttributes *myattr = new RaaSeqAttributes();
-	char *name = raa_getattributes(this->raa_data, name_or_accno.c_str(), &myattr->rank, &myattr->length, 
-						&myattr->frame, &acnuc_gc, &access, &description, &species, NULL);
-	myattr->raa = this;
-	myattr->name = name;
-	myattr->description = description;
-	myattr->accno = access;
-	myattr->species = species;
-	myattr->ncbi_gc = get_ncbi_gc_number(acnuc_gc);
-	return myattr;
+  char *description, *species, *access;
+  int acnuc_gc, rank, length, frame;
+  char *name = raa_getattributes(this->raa_data, name_or_accno.c_str(), &rank, &length,
+                                 &frame, &acnuc_gc, &access, &description, &species, NULL);
+  if (!name) {
+    return NULL;
+  }
+  RaaSeqAttributes *myattr = new RaaSeqAttributes();
+  myattr->raa = this;
+  myattr->rank = rank;
+  myattr->length = length;
+  myattr->frame = frame;
+  myattr->name = name;
+  myattr->description = description;
+  myattr->accno = access;
+  myattr->species = species;
+  myattr->ncbi_gc = get_ncbi_gc_number(acnuc_gc);
+  return myattr;
 }
 
 
