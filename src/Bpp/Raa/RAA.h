@@ -28,7 +28,7 @@ extern "C" {
 
 #include <string>
 #include <Bpp/Seq/Sequence.h>
-#include <Bpp/Seq/Alphabet.all>
+#include <Bpp/Seq/Alphabet/AlphabetTools.h>
 
 #include "RaaList.h"
 #include "RaaSpeciesTree.h"

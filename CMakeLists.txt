@@ -8,7 +8,7 @@ project(bpp-raa C CXX)
 if(NOT DEFINED CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif(NOT DEFINED CMAKE_BUILD_TYPE)
-set(CMAKE_CXX_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS "-std=c++11 -Wall")
 
 IF(NOT NO_DEP_CHECK)
   SET(NO_DEP_CHECK FALSE CACHE BOOL
@@ -121,13 +121,6 @@ SET(CPACK_SOURCE_IGNORE_FILES
  ".*\\\\..*\\\\.swp"
  "src/\\\\..*"
  "src/libbpp*"
- "debian/tmp"
- "debian/libbpp.*/"
- "debian/libbpp.*\\\\.so.*"
- "debian/libbpp.*\\\\.a"
- "debian/libbpp.*\\\\.substvars"
- "debian/libbpp.*\\\\.debhelper"
- "debian/debhelper\\\\.log"
  "html"
  "Raa.tag"
  "Testing"
@@ -157,11 +150,6 @@ ENDIF()
 
 IF(NOT NO_DEP_CHECK)
 IF (UNIX)
-#This creates deb packages:
-ADD_CUSTOM_TARGET(origdist COMMAND cp ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz ../${CPACK_DEBSOURCE_PACKAGE_FILE_NAME}.tar.gz)
-ADD_DEPENDENCIES(origdist dist)
-ADD_CUSTOM_TARGET(deb dpkg-buildpackage -uc -us -i${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
-ADD_DEPENDENCIES(deb origdist)
 
 #This creates rpm packages:
 ADD_CUSTOM_TARGET(rpm rpmbuild -ta ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
