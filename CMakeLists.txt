@@ -1,14 +1,22 @@
 # CMake script for Bio++ Remote Acnuc Access
-# Author: Sylvain Gaillard and Julien Dutheil
+# Authors:
+#   Sylvain Gaillard
+#   Julien Dutheil
+#   Francois Gindraud (2017)
 # Created: 11/09/2009
 
-# Global parameters
-cmake_minimum_required(VERSION 2.6)
-project(bpp-raa C CXX)
-if(NOT DEFINED CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
-endif(NOT DEFINED CMAKE_BUILD_TYPE)
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall")
+cmake_minimum_required (VERSION 2.8.12)
+project (bpp-raa C CXX)
+
+# Compile options (see src/CMakeLists.txt for details about where to place options)
+set (private-cxx-compile-options -std=c++11)
+set (private-compile-options -Wall)
+
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING
+      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
 
 IF(NOT NO_DEP_CHECK)
   SET(NO_DEP_CHECK FALSE CACHE BOOL
@@ -28,59 +36,57 @@ ELSE(NO_DEP_CHECK)
 #           library implements.
 # In other words, the library implements all the interface numbers in the
 # range from number current - age to current.
-set(BPPRAA_VERSION_CURRENT "2")
-set(BPPRAA_VERSION_REVISION "1")
-set(BPPRAA_VERSION_AGE "1")
+SET(${PROJECT_NAME}_VERSION_CURRENT "2")
+SET(${PROJECT_NAME}_VERSION_REVISION "1")
+SET(${PROJECT_NAME}_VERSION_AGE "1")
 
 # Effective version number computation
-math(EXPR BPPRAA_VERSION_MAJOR "${BPPRAA_VERSION_CURRENT} -
-${BPPRAA_VERSION_AGE}")
-set(BPPRAA_VERSION_MINOR ${BPPRAA_VERSION_AGE})
-set(BPPRAA_VERSION_PATCH ${BPPRAA_VERSION_REVISION})
-set(BPPRAA_VERSION "${BPPRAA_VERSION_MAJOR}.${BPPRAA_VERSION_MINOR}.${BPPRAA_VERSION_PATCH}")
+math(EXPR ${PROJECT_NAME}_VERSION_MAJOR "${${PROJECT_NAME}_VERSION_CURRENT} - ${${PROJECT_NAME}_VERSION_AGE}")
+SET(${PROJECT_NAME}_VERSION_MINOR ${${PROJECT_NAME}_VERSION_AGE})
+SET(${PROJECT_NAME}_VERSION_PATCH ${${PROJECT_NAME}_VERSION_REVISION})
+SET(${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
 
-# Set the CMAKE_PREFIX_PATH for the find_library fonction when using non
-# standard install location
-IF(CMAKE_INSTALL_PREFIX)
-  SET(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
-ENDIF(CMAKE_INSTALL_PREFIX)
+set (PROJECT_VERSION ${${PROJECT_NAME}_VERSION})
 
-#here is a useful function:
-MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
-  #start:
-  FIND_PATH(${lib_name}_INCLUDE_DIR ${include_to_find})
-  SET(${lib_name}_NAMES ${lib_name} ${lib_name}lib ${lib_name}dll)
-  FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES} PATH_SUFFIXES lib${LIB_SUFFIX})
+# Find dependencies (add install directory to search)
+if (CMAKE_INSTALL_PREFIX)
+  set (CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
+endif (CMAKE_INSTALL_PREFIX)
 
-  IF(${lib_name}_LIBRARY)
-    MESSAGE("-- Library ${lib_name} found here:")
-    MESSAGE("   includes : ${${lib_name}_INCLUDE_DIR}")
-    MESSAGE("   libraries: ${${lib_name}_LIBRARY}")
-  ELSE(${lib_name}_LIBRARY)
-    MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
-  ENDIF(${lib_name}_LIBRARY)
-  
-  #add the dependency:
-  INCLUDE_DIRECTORIES(${${lib_name}_INCLUDE_DIR})
-  SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
-ENDMACRO(IMPROVED_FIND_LIBRARY)
+find_package (bpp-seq 9.1.3 REQUIRED)
 
-#Find the Bio++ libraries:
-IMPROVED_FIND_LIBRARY(LIBS bpp-seq Bpp/Seq/Alphabet/Alphabet.h)
-#Not explicitely needed:
-#IMPROVED_FIND_LIBRARY(LIBS bpp-core Bpp/Clonable.h)
-
-# Find the zlib installation
+# Find the zlib installation (define zlib imported target)
 find_package(ZLIB REQUIRED)
-include_directories(${ZLIB_INCLUDE_DIR})
-set(LIBS ${LIBS} ${ZLIB_LIBRARIES})
+add_library (zlib IMPORTED UNKNOWN)
+set_target_properties (zlib PROPERTIES
+  IMPORTED_LOCATION ${ZLIB_LIBRARIES}
+  INTERFACE_INCLUDE_DIRECTORIES ${ZLIB_INCLUDE_DIR}
+  )
 
-# Subdirectories
-add_subdirectory(src)
+# CMake package
+set (cmake-package-location lib/cmake/${PROJECT_NAME})
+include (CMakePackageConfigHelpers)
+configure_package_config_file (
+  package.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/package.cmake
+  INSTALL_DESTINATION ${cmake-package-location}
+  )
+write_basic_package_version_file (
+  ${CMAKE_CURRENT_BINARY_DIR}/package-version.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+  )
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/package.cmake DESTINATION ${cmake-package-location}
+  RENAME ${PROJECT_NAME}-config.cmake)
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/package-version.cmake DESTINATION ${cmake-package-location}
+  RENAME ${PROJECT_NAME}-config-version.cmake)
+
+# Define the libraries
+add_subdirectory (src)
 
 # Doxygen
-find_package(Doxygen)
-if (DOXYGEN_FOUND)
+FIND_PACKAGE(Doxygen)
+IF (DOXYGEN_FOUND)
   ADD_CUSTOM_TARGET (apidoc cp Doxyfile ${CMAKE_BINARY_DIR}/Doxyfile-build
     COMMAND echo "OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR}" >> ${CMAKE_BINARY_DIR}/Doxyfile-build
     COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile-build
@@ -90,7 +96,7 @@ if (DOXYGEN_FOUND)
     COMMAND echo "HTML_HEADER=header.html" >> ${CMAKE_BINARY_DIR}/Doxyfile-stable
     COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile-stable
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-endif (DOXYGEN_FOUND)
+ENDIF (DOXYGEN_FOUND)
 
 ENDIF(NO_DEP_CHECK)
 
