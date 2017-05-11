@@ -19,14 +19,6 @@ set (CPP_FILES
   Bpp/Raa/RaaSpeciesTree.cpp
   )
 
-# Here we have both C and CPP files, so -std=c++11 must not be applied to C_FILES.
-# Cpp specific options (-std=c++11) are placed in *-cxx-compile-options.
-# *-cxx-compile-options are applied to source files (and not whole target), and also to interface.
-# -Wall in private-compile-options is valid in C and CPP, so it is placed at target level.
-set_source_files_properties (${CPP_FILES} PROPERTIES
-  COMPILE_FLAGS ${private-cxx-compile-options}
-  )
-
 # Build the static lib
 add_library (${PROJECT_NAME}-static STATIC ${CPP_FILES} ${C_FILES})
 target_include_directories (${PROJECT_NAME}-static PUBLIC
@@ -35,7 +27,6 @@ target_include_directories (${PROJECT_NAME}-static PUBLIC
   )
 set_target_properties (${PROJECT_NAME}-static PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 target_link_libraries (${PROJECT_NAME}-static ${BPP_LIBS_STATIC} zlib)
-target_compile_options (${PROJECT_NAME}-static PRIVATE ${private-compile-options})
 
 # Build the shared lib
 add_library (${PROJECT_NAME}-shared SHARED ${CPP_FILES} ${C_FILES})
@@ -50,7 +41,6 @@ set_target_properties (${PROJECT_NAME}-shared
   SOVERSION ${${PROJECT_NAME}_VERSION_MAJOR}
   )
 target_link_libraries (${PROJECT_NAME}-shared ${BPP_LIBS_SHARED} zlib)
-target_compile_options (${PROJECT_NAME}-shared PRIVATE ${private-compile-options})
 
 # Install libs and headers
 install (
