@@ -1272,34 +1272,28 @@ int raa_bcount(raa_db_access* raa_current_db, int lrank)
 
 void raa_bit1(raa_db_access* raa_current_db, int lrank, int num)
 {
-  char* reponse = 0;
-
   if (raa_current_db == NULL)
     return;
   sock_printf(raa_current_db, "bit1&lrank=%d&num=%d\n", lrank, num);
-  reponse = read_sock(raa_current_db);
+  read_sock(raa_current_db); //memory leak?
 }
 
 
 void raa_bit0(raa_db_access* raa_current_db, int lrank, int num)
 {
-  char* reponse;
-
   if (raa_current_db == NULL)
     return;
   sock_printf(raa_current_db, "bit0&lrank=%d&num=%d\n", lrank, num);
-  reponse = read_sock(raa_current_db);
+  read_sock(raa_current_db); //memory leak?
 }
 
 
 int raa_btest(raa_db_access* raa_current_db, int lrank, int num)
 {
-  char* reponse;
-
   if (raa_current_db == NULL)
     return 0;
   sock_printf(raa_current_db, "btest&lrank=%d&num=%d\n", lrank, num);
-  reponse = read_sock(raa_current_db);
+  char* reponse = read_sock(raa_current_db);
   if (reponse == NULL)
     return 0;
   return strcmp(reponse, "code=0&on") == 0;
@@ -1307,29 +1301,25 @@ int raa_btest(raa_db_access* raa_current_db, int lrank, int num)
 
 void raa_copylist(raa_db_access* raa_current_db, int from, int to)
 {
-  char* reponse;
-
   if (raa_current_db == NULL)
     return;
   sock_printf(raa_current_db, "copylist&lfrom=%d&lto=%d\n", from, to);
-  reponse = read_sock(raa_current_db);
+  read_sock(raa_current_db); //memory leak?
 }
 
 
 void raa_zerolist(raa_db_access* raa_current_db, int rank)
 {
-  char* reponse;
-
   if (raa_current_db == NULL)
     return;
   sock_printf(raa_current_db, "zerolist&lrank=%d\n", rank);
-  reponse = read_sock(raa_current_db);
+  read_sock(raa_current_db); //memory leak?
 }
 
 
 void raa_setliststate(raa_db_access* raa_current_db, int lrank, int locus, int type)
 {
-  char* reponse, str_type[3];
+  char str_type[3];
 
   if (raa_current_db == NULL)
     return;
@@ -1342,7 +1332,7 @@ void raa_setliststate(raa_db_access* raa_current_db, int lrank, int locus, int t
 
   sock_printf(raa_current_db, "setliststate&lrank=%d&locus=%c&type=%s\n", lrank, (locus ? 'T' : 'F'),
               str_type );
-  reponse = read_sock(raa_current_db);
+  read_sock(raa_current_db); //memory leak?
 }
 
 
