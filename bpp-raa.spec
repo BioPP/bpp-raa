@@ -1,5 +1,5 @@
 %define _basename bpp-raa
-%define _version 2.3.0
+%define _version 2.3.1
 %define _release 1
 %define _prefix /usr
 
@@ -19,9 +19,9 @@ Requires: bpp-seq = %{_version}
 BuildRoot: %{_builddir}/%{_basename}-root
 BuildRequires: cmake >= 2.8.11
 BuildRequires: gcc-c++ >= 4.7.0
-BuildRequires: libbpp-core2 = %{_version}
+BuildRequires: libbpp-core3 = %{_version}
 BuildRequires: libbpp-core-devel = %{_version}
-BuildRequires: libbpp-seq9 = %{_version}
+BuildRequires: libbpp-seq11 = %{_version}
 BuildRequires: libbpp-seq-devel = %{_version}
 BuildRequires: zlib >= 1.2.3
 BuildRequires: zlib-devel >= 1.2.3
@@ -33,21 +33,21 @@ AutoProv: yes
 This library contains utilitary and classes to query public database (GenBank, EMBL, SwissProt, etc) using acnuc.
 It is part of the Bio++ project.
 
-%package -n libbpp-raa1
+%package -n libbpp-raa3
 Summary: Bio++ Remote Acnuc Access library
 Group: Development/Libraries/C and C++
 
-%description -n libbpp-raa1
+%description -n libbpp-raa3
 This library contains utilitary and classes to query public database (GenBank, EMBL, SwissProt, etc) using acnuc.
 It is part of the Bio++ project.
 
 %package -n libbpp-raa-devel
 Summary: Libraries, includes to develop applications with %{_basename}
 Group: Development/Libraries/C and C++
-Requires: libbpp-raa1 = %{_version}
-Requires: libbpp-seq9 = %{_version}
+Requires: libbpp-raa3 = %{_version}
+Requires: libbpp-seq11 = %{_version}
 Requires: libbpp-seq-devel = %{_version}
-Requires: libbpp-core2 = %{_version}
+Requires: libbpp-core3 = %{_version}
 Requires: libbpp-core-devel = %{_version}
 Requires: zlib >= 1.2.3
 Requires: zlib-devel >= 1.2.3
@@ -74,11 +74,11 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post -n libbpp-raa1 -p /sbin/ldconfig
+%post -n libbpp-raa3 -p /sbin/ldconfig
 
-%postun -n libbpp-raa1 -p /sbin/ldconfig
+%postun -n libbpp-raa3 -p /sbin/ldconfig
 
-%files -n libbpp-raa1
+%files -n libbpp-raa3
 %defattr(-,root,root)
 %doc AUTHORS.txt COPYING.txt INSTALL.txt ChangeLog
 %{_prefix}/%{_lib}/lib*.so.*
@@ -94,6 +94,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/include/*
 
 %changelog
+* Tue Jun 06 2017 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.3.1-1
+- Increased interface number
 * Wed May 10 2017 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.3.0-1
 - Compatibility update.
 * Mon Sep 22 2014 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.2.0-1
