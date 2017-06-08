@@ -62,9 +62,6 @@ building applications which use %{_basename}.
 %build
 CFLAGS="$RPM_OPT_FLAGS"
 CMAKE_FLAGS="-DCMAKE_INSTALL_PREFIX=%{_prefix} -DBUILD_TESTING=OFF"
-if [ %{_lib} == 'lib64' ] ; then
-  CMAKE_FLAGS="$CMAKE_FLAGS -DLIB_SUFFIX=64"
-fi
 cmake $CMAKE_FLAGS .
 make
 
@@ -86,11 +83,11 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libbpp-raa-devel
 %defattr(-,root,root)
 %doc AUTHORS.txt COPYING.txt INSTALL.txt ChangeLog
-%dir %{_prefix}/lib/cmake/
-%dir %{_prefix}/lib/cmake/bpp-raa
+%dir %{_prefix}/%{_lib}/cmake/
+%dir %{_prefix}/%{_lib}/cmake/bpp-raa
 %{_prefix}/%{_lib}/lib*.so
 %{_prefix}/%{_lib}/lib*.a
-%{_prefix}/lib/cmake/bpp-raa/bpp-raa*.cmake
+%{_prefix}/%{_lib}/cmake/bpp-raa/bpp-raa*.cmake
 %{_prefix}/include/*
 
 %changelog
