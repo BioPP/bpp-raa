@@ -97,7 +97,7 @@ public:
    *               4: database is currently not available for remote connection\n
    *               7: not enough memory
    */
-  RAA(const std::string& dbname, int port = 5558, const std::string& server = "pbil.univ-lyon1.fr") throw (int);
+  RAA(const std::string& dbname, int port = 5558, const std::string& server = "pbil.univ-lyon1.fr");
 
   /**
    * @brief Direct constructor: opens a network connection to a database server, without specifying a database.
@@ -113,7 +113,7 @@ public:
    *               2: cannot create connection with server\n
    *               7: not enough memory
    */
-  RAA(int port = 5558, const std::string& server = "pbil.univ-lyon1.fr") throw (int);
+  RAA(int port = 5558, const std::string& server = "pbil.univ-lyon1.fr");
 
   /**
    * @brief Destructor: closes both the database access, if any, and the network connection.
@@ -272,7 +272,7 @@ public:
    * @throw BadCharException In rare cases, the CDS may contain an internal stop codon that raises an
    * exception when translated to protein.
    */
-  Sequence* translateCDS(int seqrank) throw (BadCharException); // TODO add comment to Sequence
+  Sequence* translateCDS(int seqrank); // TODO add comment to Sequence
 
   /**
    * @brief Returns the full protein translation of a protein-coding nucleotide database (sub)sequence.
@@ -285,7 +285,7 @@ public:
    * @throw BadCharException In rare cases, the CDS may contain an internal stop codon that raises an
    * exception when translated to protein.
    */
-  Sequence* translateCDS(const std::string& name) throw (BadCharException);
+  Sequence* translateCDS(const std::string& name);
 
   /**
    * @brief Returns the amino acid translation of the first codon of a protein-coding (sub)sequence.
@@ -316,7 +316,7 @@ public:
    * @return          The resulting list of matching database elements.
    * @throw string    If error, the string is a message describing the error cause.
    */
-  RaaList* processQuery(const std::string& query, const std::string& listname) throw (std::string);
+  RaaList* processQuery(const std::string& query, const std::string& listname);
 
   /**
    * @brief Creates an empty list with specified name.
@@ -328,7 +328,7 @@ public:
    * @throw int    3: a list with same name already existed; it is left unchanged.\n
    * 4: the server cannot create more lists.
    */
-  RaaList* createEmptyList(const std::string& listname, const std::string& kind = RaaList::LIST_SEQUENCES) throw (int);
+  RaaList* createEmptyList(const std::string& listname, const std::string& kind = RaaList::LIST_SEQUENCES);
 
   /**
    * @brief Deletes a list and calls its destructor.
@@ -406,7 +406,7 @@ public:
    * @return	An opaque pointer to be transmitted to functions getNextFeature() or interruptGetAnyFeature().
    * @throw string	A message indicating the cause of the error.
    */
-  void* prepareGetAnyFeature(int seqrank, const std::string& featurekey) throw (std::string);
+  void* prepareGetAnyFeature(int seqrank, const std::string& featurekey);
 
   /**
    * @brief	Successively returns features specified in a previous prepareGetAnyFeature() call.

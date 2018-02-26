@@ -15,7 +15,7 @@ int sock_printf(raa_db_access* raa_current_db, const char* fmt, ...);
 using namespace std;
 using namespace bpp;
 
-RAA::RAA(const string& dbname, int port, const string& server) throw (int)
+RAA::RAA(const string& dbname, int port, const string& server)
 {
   kw_pattern = NULL;
   current_address.div = -1;
@@ -27,7 +27,7 @@ RAA::RAA(const string& dbname, int port, const string& server) throw (int)
 }
 
 
-RAA::RAA(int port, const string& server) throw (int)
+RAA::RAA(int port, const string& server)
 {
   kw_pattern = NULL;
   int error = raa_open_socket((char*)server.c_str(), port, (char*)"Bio++", &raa_data);
@@ -241,7 +241,7 @@ string RAA::getAnnotLineAtAddress(RaaAddress address)
 }
 
 
-Sequence* RAA::translateCDS(int seqrank) throw (BadCharException)
+Sequence* RAA::translateCDS(int seqrank)
 {
   char* descript;
   if (seqrank < 2 || seqrank > raa_data->nseq)
@@ -276,7 +276,7 @@ Sequence* RAA::translateCDS(int seqrank) throw (BadCharException)
 }
 
 
-Sequence* RAA::translateCDS(const string& name) throw (BadCharException)
+Sequence* RAA::translateCDS(const string& name)
 {
   int rank;
   rank = raa_isenum(raa_data, (char*)name.c_str());
@@ -303,7 +303,7 @@ char RAA::translateInitCodon(int seqrank)
 }
 
 
-RaaList* RAA::processQuery(const string& query, const string& listname) throw (string)
+RaaList* RAA::processQuery(const string& query, const string& listname)
 {
   char* message;
   int type, rank;
@@ -329,7 +329,7 @@ RaaList* RAA::processQuery(const string& query, const string& listname) throw (s
 }
 
 
-RaaList* RAA::createEmptyList(const string& listname, const string& kind) throw (int)
+RaaList* RAA::createEmptyList(const string& listname, const string& kind)
 {
   int err, lrank;
   char type, * p = 0, * q = 0;
@@ -552,7 +552,7 @@ struct extract_data
 };
 
 
-void* RAA::prepareGetAnyFeature(int seqrank, const string& featurekey) throw (string)
+void* RAA::prepareGetAnyFeature(int seqrank, const string& featurekey)
 {
   char* p, * line;
   int l;

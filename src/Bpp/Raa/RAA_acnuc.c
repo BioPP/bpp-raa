@@ -3192,7 +3192,7 @@ char* raa_translate_cds(raa_db_access* raa_current_db, int seqnum)
 char raa_translate_init_codon(raa_db_access* raa_current_db, int numseq)
 {
   char codon[4];
-  int point, special_init = TRUE, val, gc, phase, rank = 0;
+  int point, special_init = TRUE, val, gc = 0, phase = 0, rank = 0;
 
   if (raa_current_db->num_5_partial == 0)
     raa_current_db->num_5_partial = raa_iknum(raa_current_db, "5'-PARTIAL", raa_key);
