@@ -1,28 +1,25 @@
-%define _basename bpp-raa
-%define _version 2.4.0
-%define _release 1
 %define _prefix /usr
 
-URL: http://biopp.univ-montp2.fr/
+URL: https://github.com/BioPP/bpp-raa
 
-Name: %{_basename}
-Version: %{_version}
-Release: %{_release}
+Name: bpp-raa
+Version: 2.4.0
+Release: 1
 License: CECILL-2.0
 Vendor: The Bio++ Project
-Source: http://biopp.univ-montp2.fr/repos/sources/%{_basename}-%{_version}.tar.gz
+Source: %{name}-%{version}.tar.gz
 Summary: Bio++ Remote Acnuc Access library
 Group: Development/Libraries/C and C++
-Requires: bpp-core = %{_version}
-Requires: bpp-seq = %{_version}
+Requires: bpp-core = %{version}
+Requires: bpp-seq = %{version}
 
-BuildRoot: %{_builddir}/%{_basename}-root
+BuildRoot: %{_builddir}/%{name}-root
 BuildRequires: cmake >= 2.8.11
 BuildRequires: gcc-c++ >= 4.7.0
-BuildRequires: libbpp-core3 = %{_version}
-BuildRequires: libbpp-core-devel = %{_version}
-BuildRequires: libbpp-seq11 = %{_version}
-BuildRequires: libbpp-seq-devel = %{_version}
+BuildRequires: libbpp-core4 = %{version}
+BuildRequires: libbpp-core-devel = %{version}
+BuildRequires: libbpp-seq12 = %{version}
+BuildRequires: libbpp-seq-devel = %{version}
 BuildRequires: zlib >= 1.2.3
 BuildRequires: zlib-devel >= 1.2.3
 
@@ -54,7 +51,7 @@ Requires: zlib-devel >= 1.2.3
 
 %description -n libbpp-raa-devel
 The libbpp-raa-devel package contains the header files and static libraries for
-building applications which use %{_basename}.
+building applications which use %{name}.
 
 %prep
 %setup -q
@@ -93,6 +90,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Mon Feb 25 2018 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.4.0-1
 - Increased interface number
+- Removed dynamic exceptions declarations.
 * Tue Jun 06 2017 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.3.1-1
 - Increased interface number
 * Wed May 10 2017 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.3.0-1
