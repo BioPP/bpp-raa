@@ -41,11 +41,11 @@ It is part of the Bio++ project.
 %package -n libbpp-raa-devel
 Summary: Libraries, includes to develop applications with %{_basename}
 Group: Development/Libraries/C and C++
-Requires: libbpp-raa4 = %{_version}
-Requires: libbpp-seq12 = %{_version}
-Requires: libbpp-seq-devel = %{_version}
-Requires: libbpp-core4 = %{_version}
-Requires: libbpp-core-devel = %{_version}
+Requires: libbpp-raa4 = %{version}
+Requires: libbpp-seq12 = %{version}
+Requires: libbpp-seq-devel = %{version}
+Requires: libbpp-core4 = %{version}
+Requires: libbpp-core-devel = %{version}
 Requires: zlib >= 1.2.3
 Requires: zlib-devel >= 1.2.3
 
