@@ -53,6 +53,8 @@ Requires: zlib-devel >= 1.2.3
 The libbpp-raa-devel package contains the header files and static libraries for
 building applications which use %{name}.
 
+%global debug_package %{nil}
+
 %prep
 %setup -q
 
@@ -88,7 +90,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/include/*
 
 %changelog
-* Mon Feb 25 2018 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.4.0-1
+* Mon Feb 26 2018 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.4.0-1
 - Increased interface number
 - Removed dynamic exceptions declarations.
 * Tue Jun 06 2017 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.3.1-1
