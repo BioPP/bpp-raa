@@ -262,7 +262,7 @@ Sequence* RAA::translateCDS(int seqrank)
   {
     Sprot = new BasicSequence(*sname, *pstring, &AlphabetTools::PROTEIN_ALPHABET );
   }
-  catch (BadCharException e)
+  catch (BadCharException& e)
   {
     delete sname;
     delete pstring;
@@ -283,14 +283,7 @@ Sequence* RAA::translateCDS(const string& name)
   if (rank == 0)
     return NULL;
   Sequence* Sprot;
-  try
-  {
-    Sprot = translateCDS(rank);
-  }
-  catch (BadCharException e)
-  {
-    throw e;
-  }
+  Sprot = translateCDS(rank);
   return Sprot;
 }
 
