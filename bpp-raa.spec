@@ -3,7 +3,7 @@
 URL: https://github.com/BioPP/bpp-raa
 
 Name: bpp-raa
-Version: 2.4.0
+Version: 2.4.1
 Release: 1%{?dist}
 License: CECILL-2.0
 Vendor: The Bio++ Project
@@ -90,8 +90,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/include/*
 
 %changelog
+* Mon Aug 13 2018 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.4.1-1
+- Compatibility gcc8.
 * Mon Feb 26 2018 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.4.0-1
-- Increased interface number
+- Increased interface number.
 - Removed dynamic exceptions specifications.
 * Tue Jun 06 2017 Julien Dutheil <julien.dutheil@univ-montp2.fr> 2.3.1-1
 - Increased interface number
