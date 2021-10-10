@@ -377,7 +377,7 @@ char codaa(char* codon, int code)
 
   num = calc_codon_number(codon);
   if (code < 0 || code >= totcodes)
-    code = 0;  /*use regular code if unknown number */
+    code = 0;                 /*use regular code if unknown number */
   pdata = &genetic_code[code]; /* ici ecriture plus compacte mal compilee sur PC*/
   return aminoacids[ pdata->code[num] - 1 ];
 }
@@ -658,7 +658,7 @@ int compch(char* cible, int lcible, char** posmot, int nbrmots)
     num++;
   }
   if (total == nbrmots - 1)
-    return 1;  /* template se termine par @ */
+    return 1;                 /* template se termine par @ */
 /* test si cible se termine par dernier mot du template */
   l = (int)strlen(posmot[nbrmots - 1]);
   if (strcmp(vcible + lcible - l, posmot[nbrmots - 1]) == 0)

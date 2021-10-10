@@ -35,7 +35,7 @@ void ajout_reponse(Reponse* rep, char* pile, int len)
   if (rep->nbarguments == 0)
     rep->arg = (char**)malloc(1 * sizeof(char*));
   else
-    rep->arg = (char**) realloc(rep->arg, (rep->nbarguments + 1) * sizeof(char*));  /* ici j'ai deja alloue donc realloc (plus de ligne) */
+    rep->arg = (char**) realloc(rep->arg, (rep->nbarguments + 1) * sizeof(char*));                                                                                      /* ici j'ai deja alloue donc realloc (plus de ligne) */
 
   rep->arg[rep->nbarguments] = (char*) malloc(len + 1); /* j'alloue l'espace pour l'argument */
 
@@ -117,7 +117,7 @@ char* unprotect_quotes(char* name)
   {
     memmove(name, name + 1, l--); /* enlever la " initiale */
     if (*(name + l - 1) == '"')
-      *(name + --l) = 0;  /* enlever la " terminale */
+      *(name + --l) = 0;                            /* enlever la " terminale */
   }
 
   while ((p = strstr(name, "\\\"" /* la chaine \"  */ )) != NULL)

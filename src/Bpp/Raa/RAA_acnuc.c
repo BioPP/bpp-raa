@@ -353,7 +353,7 @@ int raa_open_socket(const char* serveurName, int port, const char* clientid, raa
 
   raa_current_db = (raa_db_access*)calloc(1, sizeof(raa_db_access));
   if (raa_current_db == NULL)
-    return nomemory;  /* not enough memory */
+    return nomemory;                        /* not enough memory */
   /* création de la socket */
 #ifdef WIN32
   err = WSAStartup(MAKEWORD(2, 2), &mywsadata); /* indispensable avant utilisation socket */
@@ -420,7 +420,7 @@ int raa_open_socket(const char* serveurName, int port, const char* clientid, raa
 
 extern void raa_MD5String (char* in_string, char out_digest[33]);
 
-int raa_opendb_pw(raa_db_access* raa_current_db, const char* db_name, void* ptr, char*(*getpasswordf)(void*) )
+int raa_opendb_pw(raa_db_access* raa_current_db, const char* db_name, void* ptr, char* (*getpasswordf)(void*) )
 /*
    getpasswordf: pointer to function that gets called if a password is needed
    ptr: pointer to data passed to the getpasswordf function
@@ -488,7 +488,7 @@ int raa_opendb_pw(raa_db_access* raa_current_db, const char* db_name, void* ptr,
   p = val(rep, "type");
   raa_current_db->dbname = strdup(db_name);
   raa_current_db->genbank = raa_current_db->embl = raa_current_db->swissprot =
-                                                     raa_current_db->nbrf = FALSE;
+    raa_current_db->nbrf = FALSE;
   if (p != NULL)
   {
     if (strcmp(p, "GENBANK") == 0)
@@ -1275,7 +1275,7 @@ void raa_bit1(raa_db_access* raa_current_db, int lrank, int num)
   if (raa_current_db == NULL)
     return;
   sock_printf(raa_current_db, "bit1&lrank=%d&num=%d\n", lrank, num);
-  read_sock(raa_current_db); //memory leak?
+  read_sock(raa_current_db); // memory leak?
 }
 
 
@@ -1284,7 +1284,7 @@ void raa_bit0(raa_db_access* raa_current_db, int lrank, int num)
   if (raa_current_db == NULL)
     return;
   sock_printf(raa_current_db, "bit0&lrank=%d&num=%d\n", lrank, num);
-  read_sock(raa_current_db); //memory leak?
+  read_sock(raa_current_db); // memory leak?
 }
 
 
@@ -1304,7 +1304,7 @@ void raa_copylist(raa_db_access* raa_current_db, int from, int to)
   if (raa_current_db == NULL)
     return;
   sock_printf(raa_current_db, "copylist&lfrom=%d&lto=%d\n", from, to);
-  read_sock(raa_current_db); //memory leak?
+  read_sock(raa_current_db); // memory leak?
 }
 
 
@@ -1313,7 +1313,7 @@ void raa_zerolist(raa_db_access* raa_current_db, int rank)
   if (raa_current_db == NULL)
     return;
   sock_printf(raa_current_db, "zerolist&lrank=%d\n", rank);
-  read_sock(raa_current_db); //memory leak?
+  read_sock(raa_current_db); // memory leak?
 }
 
 
@@ -1332,7 +1332,7 @@ void raa_setliststate(raa_db_access* raa_current_db, int lrank, int locus, int t
 
   sock_printf(raa_current_db, "setliststate&lrank=%d&locus=%c&type=%s\n", lrank, (locus ? 'T' : 'F'),
               str_type );
-  read_sock(raa_current_db); //memory leak?
+  read_sock(raa_current_db); // memory leak?
 }
 
 
@@ -1363,7 +1363,7 @@ char* raa_getliststate(raa_db_access* raa_current_db, int lrank, int* locus, int
         *type = 'E';
     }
     if (raa_current_db->namestr != NULL)
-      free(raa_current_db->namestr);  /* allocation precedante */
+      free(raa_current_db->namestr);                                        /* allocation precedante */
     raa_current_db->namestr = val(rep, "name");
     countstr = val(rep, "count");
     if (count != NULL)

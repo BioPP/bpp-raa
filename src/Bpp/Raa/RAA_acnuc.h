@@ -170,7 +170,7 @@ typedef struct _raa_db_access
 
 typedef enum { raa_sub = 0, raa_loc, raa_key, raa_spec, raa_shrt, raa_lng, raa_ext, raa_smj,
                raa_aut, raa_bib, raa_txt, raa_acc } raa_file;
-typedef void (*raa_char_void_function)(raa_db_access*, char*);
+typedef void (* raa_char_void_function)(raa_db_access*, char*);
 
 /* global variables */
 extern raa_char_void_function raa_error_mess_proc; /*this function sd call raa_acnucclose*/
@@ -181,7 +181,7 @@ extern int raa_decode_address(char* url, char** p_ip_name, int* socket, char** p
 extern int raa_acnucopen_alt (const char* serveurName, int port, const char* db_name, const char* clientid, raa_db_access** psock);
 extern int raa_open_socket(const char* serveurName, int port, const char* clientid, raa_db_access** psock);
 extern int raa_opendb(raa_db_access* raa_current_db, const char* db_name);
-int raa_opendb_pw(raa_db_access* raa_current_db, const char* db_name, void* ptr, char*(*getpasswordf)(void*) );
+int raa_opendb_pw(raa_db_access* raa_current_db, const char* db_name, void* ptr, char* (*getpasswordf)(void*) );
 extern int raa_gfrag(raa_db_access* raa_current_db, int nsub, int first, int lfrag, char* dseq);
 extern void raa_acnucclose(raa_db_access* raa_current_db);
 extern int raa_prep_acnuc_query(raa_db_access* raa_current_db);

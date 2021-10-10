@@ -100,7 +100,7 @@ static void MD5_Update(struct MD5Context* ctx, unsigned const char* buf, unsigne
 
   t = ctx->bits[0];
   if ((ctx->bits[0] = t + ((uint32) len << 3)) < t)
-    ctx->bits[1]++;  /* Carry from low to high */
+    ctx->bits[1]++;                       /* Carry from low to high */
   ctx->bits[1] += len >> 29;
 
   t = (t >> 3) & 0x3f;  /* Bytes already in shsInfo->data */

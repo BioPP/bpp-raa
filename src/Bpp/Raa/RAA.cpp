@@ -186,7 +186,7 @@ int RAA::knownDatabases(vector<string>& name, vector<string>& description)
 }
 
 
-int RAA::openDatabase(const string& dbname, char*(*getpasswordf)(void*), void* p)
+int RAA::openDatabase(const string& dbname, char* (*getpasswordf)(void*), void* p)
 {
   current_address.div = -1;
   return raa_opendb_pw(raa_data, (char*)dbname.c_str(), p, getpasswordf);

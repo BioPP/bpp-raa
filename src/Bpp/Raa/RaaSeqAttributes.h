@@ -77,4 +77,4 @@ private:
 };
 }  // namespace bpp
 
-#endif   // _RAASEQATTRIBUTES_H_
+#endif// _RAASEQATTRIBUTES_H_

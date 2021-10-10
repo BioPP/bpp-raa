@@ -134,7 +134,7 @@ public:
    *               6: incorrect password for password-protected database\n
    *               7: not enough memory
    */
-  int openDatabase(const std::string& dbname, char*(*getpasswordf)(void*) = NULL, void* p = NULL);
+  int openDatabase(const std::string& dbname, char* (* getpasswordf)(void*) = NULL, void* p = NULL);
 
   /**
    * @brief Closes a database connection.
@@ -497,4 +497,4 @@ private:
 };
 } // end of namespace bpp.
 
-#endif // _RAA_H_
+#endif// _RAA_H_
