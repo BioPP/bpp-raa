@@ -32,7 +32,7 @@ struct rlng       /* LONGL series of linked records containing lists of SUBSEQ r
 #define RAA_GFRAG_BSIZE 10000
 struct gfrag_aux
 {
-  char buffer[RAA_GFRAG_BSIZE + 1];
+  char buffer[RAA_GFRAG_BSIZE + 2];
   int lbuf, nseq_buf, first_buf, l_nseq_buf;
 };
 
