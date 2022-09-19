@@ -9,7 +9,7 @@ cmake_minimum_required (VERSION 2.8.12)
 project (bpp-raa3 C CXX)
 
 # Compile options
-set (CMAKE_CXX_FLAGS "-std=c++11 -Wall")
+set (CMAKE_CXX_FLAGS "-std=c++14 -Wall")
 set (CMAKE_C_FLAGS "-Wall")
 
 IF(NOT CMAKE_BUILD_TYPE)
