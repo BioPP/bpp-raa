@@ -26,7 +26,11 @@ extern "C" {
 #include "RAA_acnuc.h"
 }
 
+// From the STL:
 #include <string>
+#include <memory>
+
+// From bpp-seq:
 #include <Bpp/Seq/Sequence.h>
 #include <Bpp/Seq/Alphabet/AlphabetTools.h>
 
@@ -170,7 +174,7 @@ public:
    * @param  name_or_accno   A sequence name or accession number. Case is not significant.
    * @return  Several attributes (length, species, etc..., see: RaaSeqAttributes) of a sequence.
    */
-  RaaSeqAttributes* getAttributes(const std::string& name_or_accno);
+  std::unique_ptr<RaaSeqAttributes> getAttributes(const std::string& name_or_accno);
 
   /**
    * @brief Returns several attributes of a sequence from its database rank.
@@ -179,7 +183,7 @@ public:
    * @return  Several attributes (length, species, etc..., see: RaaSeqAttributes) of a sequence,
    * or NULL if seqrank is not a valid database sequence rank.
    */
-  RaaSeqAttributes* getAttributes(int seqrank);
+  std::unique_ptr<RaaSeqAttributes> getAttributes(int seqrank);
 
   /**
    * @brief Returns a database sequence identified by name or accession number.
@@ -192,7 +196,7 @@ public:
    * @return          The database sequence including a one-line comment, or NULL if name_or_accno
    * does not match any sequence or if the sequence length exceeds maxlength.
    */
-  Sequence* getSeq(const std::string& name_or_accno, int maxlength = 100000);
+  std::unique_ptr<Sequence> getSeq(const std::string& name_or_accno, int maxlength = 100000);
 
   /**
    * @brief Returns a sequence identified by its database rank.
@@ -205,7 +209,7 @@ public:
    * @return          The database sequence including a one-line comment, or NULL if seqrank
    * does not match any sequence or if the sequence length exceeds maxlength.
    */
-  Sequence* getSeq(int seqrank, int maxlength = 100000);
+  std::unique_ptr<Sequence> getSeq(int seqrank, int maxlength = 100000);
 
   /**
    * @brief Returns any part of a sequence identified by its database rank.
@@ -272,7 +276,7 @@ public:
    * @throw BadCharException In rare cases, the CDS may contain an internal stop codon that raises an
    * exception when translated to protein.
    */
-  Sequence* translateCDS(int seqrank); // TODO add comment to Sequence
+  std::unique_ptr<Sequence> translateCDS(int seqrank); // TODO add comment to Sequence
 
   /**
    * @brief Returns the full protein translation of a protein-coding nucleotide database (sub)sequence.
@@ -285,7 +289,7 @@ public:
    * @throw BadCharException In rare cases, the CDS may contain an internal stop codon that raises an
    * exception when translated to protein.
    */
-  Sequence* translateCDS(const std::string& name);
+  std::unique_ptr<Sequence> translateCDS(const std::string& name);
 
   /**
    * @brief Returns the amino acid translation of the first codon of a protein-coding (sub)sequence.
@@ -316,7 +320,7 @@ public:
    * @return          The resulting list of matching database elements.
    * @throw string    If error, the string is a message describing the error cause.
    */
-  RaaList* processQuery(const std::string& query, const std::string& listname);
+  std::unique_ptr<RaaList> processQuery(const std::string& query, const std::string& listname);
 
   /**
    * @brief Creates an empty list with specified name.
@@ -328,7 +332,7 @@ public:
    * @throw int    3: a list with same name already existed; it is left unchanged.\n
    * 4: the server cannot create more lists.
    */
-  RaaList* createEmptyList(const std::string& listname, const std::string& kind = RaaList::LIST_SEQUENCES);
+  std::unique_ptr<RaaList> createEmptyList(const std::string& listname, const std::string& kind = RaaList::LIST_SEQUENCES);
 
   /**
    * @brief Deletes a list and calls its destructor.
@@ -367,8 +371,11 @@ public:
    * @return    The list of subsequences of <i>seqname</i> that correspond to the specified feature key and, optionally, whose
    * annotation contains the matching string, or NULL if no matching sequence exists.
    */
-  RaaList* getDirectFeature(const std::string& seqname, const std::string& featurekey, const std::string& listname,
-                            const std::string& matching = "");
+  std::unique_ptr<RaaList> getDirectFeature(
+      const std::string& seqname,
+      const std::string& featurekey,
+      const std::string& listname,
+      const std::string& matching = "");
 
   /**
    * @brief    Gives all feature keys of the database that can be directly accessed.
@@ -417,7 +424,7 @@ public:
    * @return	A sequence corresponding to one of the features specified in the prepareGetAnyFeature() call, or NULL
    * if no more such feature exists.
    */
-  Sequence* getNextFeature(void* opaque);
+  std::unique_ptr<Sequence> getNextFeature(void* opaque);
 
   /**
    * @brief	Terminates a features extraction session initiated by a prepareGetAnyFeature() call before getNextFeature() call
@@ -444,7 +451,7 @@ public:
    * @param showprogress    If true, progress information gets sent to stdout.
    * @return   An object allowing work with the full species tree (see RaaSpeciesTree), or NULL if error.
    */
-  RaaSpeciesTree* loadSpeciesTree(bool showprogress = true);
+  std::unique_ptr<RaaSpeciesTree> loadSpeciesTree(bool showprogress = true);
 
   /**
    * @brief    Frees the memory occupied by the species tree classification.
@@ -493,7 +500,7 @@ private:
   RaaAddress current_address;
   int current_kw_match;
   std::string* kw_pattern;
-  Sequence* getSeq_both(const std::string& name_or_accno, int rank, int maxlength);
+  std::unique_ptr<Sequence> getSeq_both(const std::string& name_or_accno, int rank, int maxlength);
 };
 } // end of namespace bpp.
 

@@ -13,20 +13,10 @@ set (CMAKE_CXX_FLAGS "-std=c++14 -Wall")
 set (CMAKE_C_FLAGS "-Wall")
 
 IF(NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Release CACHE STRING
+  SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
       "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
       FORCE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
-
-IF(NOT NO_DEP_CHECK)
-  SET(NO_DEP_CHECK FALSE CACHE BOOL
-      "Disable dependencies check for building distribution only."
-      FORCE)
-ENDIF(NOT NO_DEP_CHECK)
-
-IF(NO_DEP_CHECK)
-  MESSAGE("-- Dependencies checking disabled. Only distribution can be built.")
-ELSE(NO_DEP_CHECK)
 
 # Libtool-like version number
 # CURRENT:REVISION:AGE => file.so.(C-A).A.R
@@ -40,6 +30,16 @@ SET(${PROJECT_NAME}_VERSION_CURRENT "1")
 SET(${PROJECT_NAME}_VERSION_REVISION "0")
 SET(${PROJECT_NAME}_VERSION_AGE "0")
 
+#static linkage?
+IF(NOT BUILD_STATIC)
+	SET(BUILD_STATIC FALSE CACHE BOOL
+	  "Compile and install static libraries."
+      FORCE)
+ENDIF()
+IF(BUILD_STATIC)
+  MESSAGE(STATUS "Static libraries requested.")
+ENDIF()
+
 # Effective version number computation
 MATH(EXPR ${PROJECT_NAME}_VERSION_MAJOR "${${PROJECT_NAME}_VERSION_CURRENT} - ${${PROJECT_NAME}_VERSION_AGE}")
 SET(${PROJECT_NAME}_VERSION_MINOR ${${PROJECT_NAME}_VERSION_AGE})
@@ -47,12 +47,6 @@ SET(${PROJECT_NAME}_VERSION_PATCH ${${PROJECT_NAME}_VERSION_REVISION})
 SET(${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
 
 set (PROJECT_VERSION ${${PROJECT_NAME}_VERSION})
-
-# Find dependencies (add install directory to search)
-if (CMAKE_INSTALL_PREFIX)
-  set (CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
-endif (CMAKE_INSTALL_PREFIX)
-
 include (GNUInstallDirs)
 find_package (bpp-seq3 1.0.0 REQUIRED)
 
@@ -99,10 +93,8 @@ IF (DOXYGEN_FOUND)
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 ENDIF (DOXYGEN_FOUND)
 
-ENDIF(NO_DEP_CHECK)
-
 # Packager
-SET(CPACK_PACKAGE_NAME "libbpp-raa")
+SET(CPACK_PACKAGE_NAME "libbpp-raa3")
 SET(CPACK_PACKAGE_VENDOR "Bio++ Development Team")
 SET(CPACK_PACKAGE_VERSION "3.0.0")
 SET(CPACK_PACKAGE_VERSION_MAJOR "3")
@@ -130,7 +122,6 @@ INCLUDE(CPack)
 #This adds the 'dist' target
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
-IF(NOT NO_DEP_CHECK)
 IF (UNIX)
 
 #This creates rpm packages:
@@ -139,4 +130,3 @@ ADD_DEPENDENCIES(rpm dist)
 
 ENDIF()
 
-ENDIF(NOT NO_DEP_CHECK)

@@ -47,7 +47,7 @@ RAA::~RAA()
 }
 
 
-Sequence* RAA::getSeq_both(const string& name_or_accno, int rank, int maxlength)
+unique_ptr<Sequence> RAA::getSeq_both(const string& name_or_accno, int rank, int maxlength)
 {
   int length;
   char* name, * description;
@@ -66,27 +66,27 @@ Sequence* RAA::getSeq_both(const string& name_or_accno, int rank, int maxlength)
     return NULL;
   raa_gfrag(this->raa_data, rank, 1, length, (char*)cseq->data());
   cseq->resize(length);
-  const Alphabet* alphab;
+  shared_ptr<const Alphabet> alphab;
   if (raa_data->swissprot || raa_data->nbrf)
-    alphab = &AlphabetTools::PROTEIN_ALPHABET;
+    alphab = AlphabetTools::PROTEIN_ALPHABET;
   else
-    alphab = &AlphabetTools::DNA_ALPHABET;
-  Sequence* seq = new BasicSequence(sname, *cseq, comment, alphab);
+    alphab = AlphabetTools::DNA_ALPHABET;
+  auto seq = make_unique<Sequence>(sname, *cseq, comment, alphab);
   delete cseq;
   return seq;
 }
 
 
-Sequence* RAA::getSeq(const string& name_or_accno, int maxlength)
+unique_ptr<Sequence> RAA::getSeq(const string& name_or_accno, int maxlength)
 {
   return getSeq_both(name_or_accno, 0, maxlength);
 }
 
 
-Sequence* RAA::getSeq(int seqrank, int maxlength)
+unique_ptr<Sequence> RAA::getSeq(int seqrank, int maxlength)
 {
   if (seqrank < 2 || seqrank > raa_data->nseq)
-    return NULL;
+    return nullptr;
   return getSeq_both(string(""), seqrank, maxlength);
 }
 
@@ -120,7 +120,7 @@ int RAA::getSeqFrag(const string& name_or_accno, int first, int length, string& 
 }
 
 
-RaaSeqAttributes* RAA::getAttributes(const string& name_or_accno)
+unique_ptr<RaaSeqAttributes> RAA::getAttributes(const string& name_or_accno)
 {
   char* description, * species, * access;
   int acnuc_gc, rank, length, frame;
@@ -128,9 +128,9 @@ RaaSeqAttributes* RAA::getAttributes(const string& name_or_accno)
                                  &frame, &acnuc_gc, &access, &description, &species, NULL);
   if (!name)
   {
-    return NULL;
+    return nullptr;
   }
-  RaaSeqAttributes* myattr = new RaaSeqAttributes();
+  auto myattr = make_unique<RaaSeqAttributes>();
   myattr->raa = this;
   myattr->rank = rank;
   myattr->length = length;
@@ -144,17 +144,17 @@ RaaSeqAttributes* RAA::getAttributes(const string& name_or_accno)
 }
 
 
-RaaSeqAttributes* RAA::getAttributes(int seqrank)
+unique_ptr<RaaSeqAttributes> RAA::getAttributes(int seqrank)
 {
   char* description, * species, * access;
   int acnuc_gc;
   if (seqrank < 2 || seqrank > raa_data->nseq)
-    return NULL;
-  RaaSeqAttributes* myattr = new RaaSeqAttributes();
+    return nullptr;
+  auto myattr = make_unique<RaaSeqAttributes>();
   char* name = raa_seqrank_attributes(this->raa_data, seqrank, &myattr->length,
                                       &myattr->frame, &acnuc_gc, &access, &description, &species, NULL);
-  if (name == NULL)
-    return NULL;
+  if (!name)
+    return nullptr;
   myattr->rank = seqrank;
   myattr->raa = this;
   myattr->name =  name;
@@ -241,26 +241,27 @@ string RAA::getAnnotLineAtAddress(RaaAddress address)
 }
 
 
-Sequence* RAA::translateCDS(int seqrank)
+unique_ptr<Sequence> RAA::translateCDS(int seqrank)
 {
   char* descript;
   if (seqrank < 2 || seqrank > raa_data->nseq)
-    return NULL;
+    return nullptr;
   char* prot = raa_translate_cds(raa_data, seqrank);
-  if (prot == NULL)
-    return NULL;
+  if (!prot)
+    return nullptr;
   int l = strlen(prot) - 1;
   if (l >= 0 && prot[l] == '*')
     prot[l] = 0;
   char* name = raa_seqrank_attributes(raa_data, seqrank, NULL, NULL, NULL, NULL, &descript, NULL, NULL);
   string* sname = new string(name);
   string* pstring = new string(prot);
-  if (sname == NULL || pstring == NULL)
-    return NULL;
-  Sequence* Sprot;
+  if (!sname || !pstring)
+    return nullptr;
+  unique_ptr<Sequence> Sprot;
   try
   {
-    Sprot = new BasicSequence(*sname, *pstring, &AlphabetTools::PROTEIN_ALPHABET );
+    auto alphaPtr = dynamic_pointer_cast<const Alphabet>(AlphabetTools::PROTEIN_ALPHABET);
+    Sprot = make_unique<Sequence>(*sname, *pstring, alphaPtr);
   }
   catch (BadCharException& e)
   {
@@ -276,14 +277,13 @@ Sequence* RAA::translateCDS(int seqrank)
 }
 
 
-Sequence* RAA::translateCDS(const string& name)
+unique_ptr<Sequence> RAA::translateCDS(const string& name)
 {
   int rank;
   rank = raa_isenum(raa_data, (char*)name.c_str());
   if (rank == 0)
     return NULL;
-  Sequence* Sprot;
-  Sprot = translateCDS(rank);
+  auto Sprot = translateCDS(rank);
   return Sprot;
 }
 
@@ -296,7 +296,7 @@ char RAA::translateInitCodon(int seqrank)
 }
 
 
-RaaList* RAA::processQuery(const string& query, const string& listname)
+unique_ptr<RaaList> RAA::processQuery(const string& query, const string& listname)
 {
   char* message;
   int type, rank;
@@ -308,7 +308,7 @@ RaaList* RAA::processQuery(const string& query, const string& listname)
     free(message);
     throw errmess;
   }
-  RaaList* mylist = new RaaList();
+  unique_ptr<RaaList> mylist(new RaaList()); //Note: cannot use make_unique because of private constructor.
   mylist->myraa = this;
   mylist->rank = rank;
   mylist->name = listname;
@@ -322,7 +322,7 @@ RaaList* RAA::processQuery(const string& query, const string& listname)
 }
 
 
-RaaList* RAA::createEmptyList(const string& listname, const string& kind)
+unique_ptr<RaaList> RAA::createEmptyList(const string& listname, const string& kind)
 {
   int err, lrank;
   char type, * p = 0, * q = 0;
@@ -346,7 +346,7 @@ RaaList* RAA::createEmptyList(const string& listname, const string& kind)
     type = 'E';
   sock_printf(raa_data, "setliststate&lrank=%d&type=%c\n", lrank, type);
   read_sock(raa_data);
-  RaaList* mylist = new RaaList();
+  unique_ptr<RaaList> mylist(new RaaList()); //Note: cannot use make_unique because of private constructor.
   mylist->myraa = this;
   mylist->rank = lrank;
   mylist->name = listname;
@@ -398,15 +398,15 @@ static int treeloadprogress(int percent, void* data)
 }
 
 
-RaaSpeciesTree* RAA::loadSpeciesTree(bool showprogress)
+unique_ptr<RaaSpeciesTree> RAA::loadSpeciesTree(bool showprogress)
 {
   bool init_load_mess = true;
   int err = raa_loadtaxonomy(raa_data, (char*)"ROOT", showprogress ? treeloadprogress : NULL, &init_load_mess, NULL, NULL);
   if (err)
-    return NULL;
+    return nullptr;
   if (showprogress && (!init_load_mess) )
     cout << "\nSpecies tree download completed\n";
-  RaaSpeciesTree* tree = new RaaSpeciesTree();
+  auto tree = make_unique<RaaSpeciesTree>();
   tree->raa_data = raa_data;
   tree->sp_tree = raa_data->sp_tree;
   tree->tid_to_rank = raa_data->tid_to_rank;
@@ -499,12 +499,12 @@ vector<string> RAA::listAllFeatureKeys()
 }
 
 
-RaaList* RAA::getDirectFeature(const string& seqname, const string& featurekey, const string& listname, const string& matching)
+unique_ptr<RaaList> RAA::getDirectFeature(const string& seqname, const string& featurekey, const string& listname, const string& matching)
 {
   char query[80];
-  RaaList* list1;
+  unique_ptr<RaaList> list1;
   int matchinglist, err;
-  sprintf(query, "n=%s and t=%s", seqname.c_str(), featurekey.c_str());
+  snprintf(query, 80, "n=%s and t=%s", seqname.c_str(), featurekey.c_str());
   string squery = query;
   try
   {
@@ -512,29 +512,27 @@ RaaList* RAA::getDirectFeature(const string& seqname, const string& featurekey, 
   }
   catch (string s)
   {
-    return NULL;
+    return nullptr;
   }
   if (matching.empty() || list1->getCount() == 0)
     return list1;
   sock_printf(raa_data, "prep_getannots&nl=1\n%s|%s\n", raa_data->embl ? "FT" : "FEATURES", featurekey.c_str());
   char* p = read_sock(raa_data);
   if (strncmp(p, "code=0", 6) != 0)
-    return NULL;
+    return nullptr;
   err = raa_modifylist(raa_data, list1->getRank(), (char*)"scan", (char*)matching.c_str(), &matchinglist, NULL, NULL);
   if (err != 0 || raa_bcount(raa_data, matchinglist) == 0)
   {
-    delete list1;
     if (err == 0)
       raa_releaselist(raa_data, matchinglist);
-    return NULL;
+    return nullptr;
   }
   raa_setlistname(raa_data, matchinglist, (char*)listname.c_str());
-  RaaList* list2 = new RaaList();
+  unique_ptr<RaaList> list2(new RaaList()); //Note: cannot use make_unique because of private constructor.
   list2->rank = matchinglist;
   list2->myraa = this;
   list2->name = listname;
   list2->type = &RaaList::LIST_SEQUENCES;
-  delete list1;
   return list2;
 }
 
@@ -576,10 +574,9 @@ void* RAA::prepareGetAnyFeature(int seqrank, const string& featurekey)
 }
 
 
-Sequence* RAA::getNextFeature(void* v)
+unique_ptr<Sequence> RAA::getNextFeature(void* v)
 {
   char* p;
-  Sequence* seq;
   string name;
   struct extract_data* data = (struct extract_data*)v;
 
@@ -591,15 +588,15 @@ Sequence* RAA::getNextFeature(void* v)
   if (strcmp(data->line, "extractseqs END.") == 0)
   {
     delete data;
-    return NULL;
+    return nullptr;
   }
   p = strchr(data->line, ' ');
-  if (p != NULL)
+  if (p)
     *p = 0;
   name = data->line + 1;
   p = read_sock(raa_data);
   string seqdata = "";
-  while (p != NULL && strcmp(p, "extractseqs END.") != 0 && *p != 27 /* esc */  && *p != '>')
+  while (p && strcmp(p, "extractseqs END.") != 0 && *p != 27 /* esc */  && *p != '>')
   {
     seqdata += p;
     p = read_sock(raa_data);
@@ -612,7 +609,8 @@ Sequence* RAA::getNextFeature(void* v)
       p = read_sock(raa_data);
     strcpy(data->line, p);
   }
-  seq = new BasicSequence(name, seqdata, &AlphabetTools::DNA_ALPHABET);
+  auto alphaPtr = dynamic_pointer_cast<const Alphabet>(AlphabetTools::DNA_ALPHABET);
+  auto seq = make_unique<Sequence>(name, seqdata, alphaPtr);
   return seq;
 }
 
