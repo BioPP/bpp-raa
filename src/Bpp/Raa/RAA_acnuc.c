@@ -160,7 +160,7 @@ int sock_flush(raa_db_access* raa_current_db)
   return fflush(raa_current_db->raa_sockfdw);
 }
 
-#endif/* WIN32 */
+#endif /* WIN32 */
 
 
 int sock_printf(raa_db_access* raa_current_db, const char* fmt, ...)
@@ -204,10 +204,10 @@ static char* read_sock_tell(raa_db_access* raa_current_db, int* wascompleteline)
         sprintf(raa_current_db->buffer, "%s: ", raa_current_db->dbname);
       }
       strcat(raa_current_db->buffer, ( p == NULL ?
-                                       "Error: connection to acnuc server is down. Please try again."
+          "Error: connection to acnuc server is down. Please try again."
                                        :
-                                       "Error: acnuc server is down for database update. Please try again later." )
-             );
+          "Error: acnuc server is down for database update. Please try again later." )
+          );
       if (raa_error_mess_proc == NULL)
       {
         fprintf(stderr, "%s\n", raa_current_db->buffer);
@@ -357,7 +357,7 @@ int raa_open_socket(const char* serveurName, int port, const char* clientid, raa
 
   raa_current_db = (raa_db_access*)calloc(1, sizeof(raa_db_access));
   if (raa_current_db == NULL)
-    return nomemory;                        /* not enough memory */
+    return nomemory; /* not enough memory */
   /* creation de la socket */
 #ifdef WIN32
   err = WSAStartup(MAKEWORD(2, 2), &mywsadata); /* indispensable avant utilisation socket */
@@ -492,7 +492,7 @@ int raa_opendb_pw(raa_db_access* raa_current_db, const char* db_name, void* ptr,
   p = val(rep, "type");
   raa_current_db->dbname = strdup(db_name);
   raa_current_db->genbank = raa_current_db->embl = raa_current_db->swissprot =
-    raa_current_db->nbrf = FALSE;
+      raa_current_db->nbrf = FALSE;
   if (p != NULL)
   {
     if (strcmp(p, "GENBANK") == 0)
@@ -881,7 +881,7 @@ int raa_prep_acnuc_query(raa_db_access* raa_current_db)
     }
     while ((p = strchr(p, '|')) != NULL);
     raa_current_db->want_key_annots = (unsigned char*)malloc(raa_current_db->tot_key_annots *
-                                                             sizeof(unsigned char));
+          sizeof(unsigned char));
     raa_current_db->key_annots = (char**)malloc(raa_current_db->tot_key_annots * sizeof(char*));
     raa_current_db->key_annots_min = (char**)malloc(raa_current_db->tot_key_annots * sizeof(char*));
     p = annotlines;
@@ -911,7 +911,7 @@ int raa_prep_acnuc_query(raa_db_access* raa_current_db)
 static char* raa_requete_remote_file(raa_db_access* raa_current_db, char* oldrequete, int** plist, char**);
 
 int raa_proc_query(raa_db_access* raa_current_db, char* requete, char** message,
-                   char* nomliste, int* numlist, int* count, int* locus, int* type)
+    char* nomliste, int* numlist, int* count, int* locus, int* type)
 {
   char* reponse, * code, * numlistchr, * countchr, * locuschr, * typechr, * badfname, * p;
   int codret, * tmp_blists;
@@ -992,7 +992,7 @@ int raa_nexteltinlist(raa_db_access* raa_current_db, int first, int lrank, char*
 
 
 int raa_nexteltinlist_annots(raa_db_access* raa_current_db, int first, int lrank, char** pname, int* plength,
-                             raa_long* paddr, int* pdiv)
+    raa_long* paddr, int* pdiv)
 {
   int num, next, count;
   char* p;
@@ -1003,7 +1003,7 @@ int raa_nexteltinlist_annots(raa_db_access* raa_current_db, int first, int lrank
   if (lrank == raa_current_db->nextelt_data.current_rank &&
       raa_current_db->nextelt_data.previous < raa_current_db->nextelt_data.total - 1 &&
       (raa_current_db->nextelt_data.previous == -1 ||
-       first == raa_current_db->nextelt_data.tabnum[raa_current_db->nextelt_data.previous] ) )
+      first == raa_current_db->nextelt_data.tabnum[raa_current_db->nextelt_data.previous] ) )
   {
     raa_current_db->nextelt_data.previous++;
     next = raa_current_db->nextelt_data.tabnum[raa_current_db->nextelt_data.previous];
@@ -1171,7 +1171,7 @@ char* raa_read_annots(raa_db_access* raa_current_db, raa_long faddr, int div)
     }
   }
   sock_printf(raa_current_db, "read_annots&offset=%s&div=%d&nl=%d\n",
-              print_raa_long(faddr, buffer), div, ANNOTCOUNT);
+      print_raa_long(faddr, buffer), div, ANNOTCOUNT);
   p = load_annots_buf(raa_current_db, faddr, div, FALSE);
   return p;
 }
@@ -1187,12 +1187,12 @@ char* raa_next_annots(raa_db_access* raa_current_db, raa_long* paddr)
   if (raa_current_db->annot_data.annotcurrent < raa_current_db->annot_data.annotcount)
   {
     raa_current_db->annot_data.annotaddr +=
-      strlen(raa_current_db->annot_data.annotline[raa_current_db->annot_data.annotcurrent - 1]) + 1;
+        strlen(raa_current_db->annot_data.annotline[raa_current_db->annot_data.annotcurrent - 1]) + 1;
     if (paddr != NULL)
       *paddr = raa_current_db->annot_data.annotaddr;
     raa_current_db->annot_data.annotcurrent++;
     strcpy(raa_current_db->annot_data.annotsbuffer,
-           raa_current_db->annot_data.annotline[raa_current_db->annot_data.annotcurrent - 1]);
+        raa_current_db->annot_data.annotline[raa_current_db->annot_data.annotcurrent - 1]);
     return raa_current_db->annot_data.annotsbuffer;
   }
   faddr = raa_current_db->annot_data.annotaddrlast;
@@ -1335,7 +1335,7 @@ void raa_setliststate(raa_db_access* raa_current_db, int lrank, int locus, int t
     strcpy(str_type, "SP");
 
   sock_printf(raa_current_db, "setliststate&lrank=%d&locus=%c&type=%s\n", lrank, (locus ? 'T' : 'F'),
-              str_type );
+      str_type );
   read_sock(raa_current_db); // memory leak?
 }
 
@@ -1367,7 +1367,7 @@ char* raa_getliststate(raa_db_access* raa_current_db, int lrank, int* locus, int
         *type = 'E';
     }
     if (raa_current_db->namestr != NULL)
-      free(raa_current_db->namestr);                                        /* allocation precedante */
+      free(raa_current_db->namestr); /* allocation precedante */
     raa_current_db->namestr = val(rep, "name");
     countstr = val(rep, "count");
     if (count != NULL)
@@ -1670,7 +1670,7 @@ int raa_read_first_rec(raa_db_access* raa_current_db, raa_file cas)
 
 
 char* raa_readsub_pannots(raa_db_access* raa_current_db, int num, int* plength, int* ptype, int* pext, int* plkey, int* plocus,
-                          int* pframe, int* pgencode, raa_long* paddr, int* pdiv)
+    int* pframe, int* pgencode, raa_long* paddr, int* pdiv)
 /* do both seq_to_annots and readsub and buffer result for one seq */
 {
   Reponse* rep;
@@ -1725,7 +1725,7 @@ char* raa_readsub_pannots(raa_db_access* raa_current_db, int num, int* plength, 
     {
       raa_current_db->readsub_data.lname = l;
       raa_current_db->readsub_data.name = (char*)realloc(raa_current_db->readsub_data.name,
-                                                         raa_current_db->readsub_data.lname);
+            raa_current_db->readsub_data.lname);
     }
     strcpy(raa_current_db->readsub_data.name, p);
     free(p);
@@ -1787,14 +1787,14 @@ int raa_seq_to_annots(raa_db_access* raa_current_db, int numseq, raa_long* faddr
 
 
 char* raa_readsub(raa_db_access* raa_current_db, int num, int* plength, int* ptype, int* pext, int* plkey, int* plocus,
-                  int* pframe, int* pgencode)
+    int* pframe, int* pgencode)
 {
   return raa_readsub_pannots(raa_current_db, num, plength, ptype, pext, plkey, plocus, pframe, pgencode, NULL, NULL);
 }
 
 
 char* raa_readloc(raa_db_access* raa_current_db, int num, int* sub, int* pnuc, int* spec, int* host, int* plref,
-                  int* molec, int* placc, int* org)
+    int* molec, int* placc, int* org)
 {
   Reponse* rep;
   char* p, * reponse;
@@ -2085,8 +2085,8 @@ char* raa_readsmj(raa_db_access* raa_current_db, int num, char** plibel, int* pl
   if (raa_current_db->readsmj_data.lastrec == 0)
   {
     raa_current_db->readsmj_data.lastrec = load_smj(raa_current_db,
-                                                    &raa_current_db->readsmj_data.names, &raa_current_db->readsmj_data.plongs,
-                                                    &raa_current_db->readsmj_data.libels);
+          &raa_current_db->readsmj_data.names, &raa_current_db->readsmj_data.plongs,
+          &raa_current_db->readsmj_data.libels);
   }
   if (num <= 1 || num > raa_current_db->readsmj_data.lastrec)
     return NULL;
@@ -2302,7 +2302,7 @@ static void load_shrt2_aux(raa_db_access* raa_current_db, unsigned point, raa_sh
   if (raa_current_db == NULL)
     return;
   sock_printf(raa_current_db, "followshrt2&num=%u&kind=%s&rank=0&max=%d\n", point, kind_name[kind],
-              raa_current_db->readshrt2_data[kind]->size);
+      raa_current_db->readshrt2_data[kind]->size);
   /* reponse is:  code=0&num=xx&rank=xx&n=xx&val,.... n times ...\n  */
   reponse = read_sock(raa_current_db);
 
@@ -2555,7 +2555,7 @@ static char* protect_quotes(char* name)
 
 
 static char* prepare_remote_file(raa_db_access* raa_current_db, char* oldrequete, char* debut, char* type, int* plrank,
-                                 char** badfname)
+    char** badfname)
 {
   char* p, * q, * reponse, * fin;
   char* line = raa_current_db->remote_file;
@@ -2777,7 +2777,7 @@ int raa_savelist(raa_db_access* raa_current_db, int lrank, FILE* out, int use_ac
 
 
 int raa_modifylist(raa_db_access* raa_current_db, int lrank, char* type, char* operation, int* pnewlist, int (* check_interrupt)(void),
-                   int* p_processed )
+    int* p_processed )
 {
   Reponse* rep;
   char* p, * reponse;
@@ -2786,7 +2786,7 @@ int raa_modifylist(raa_db_access* raa_current_db, int lrank, char* type, char* o
   if (raa_current_db == NULL)
     return 3;
   sock_printf(raa_current_db, "modifylist&lrank=%d&type=%s&operation=\"%s\"\n", lrank,
-              type, operation );
+      type, operation );
   sock_flush(raa_current_db); /* tres important */
   if (check_interrupt == NULL)
   {
@@ -2937,7 +2937,7 @@ char* raa_short_descr(raa_db_access* raa_current_db, int seqnum, char* text, int
       p = raa_next_annots(raa_current_db, NULL);
     }
     while (!strcmptrail(p, 20, NULL, 0) ||
-           !strncmp(p, "FT        ", 10) );
+        !strncmp(p, "FT        ", 10) );
   }
   else    /* parent sequence */
   {
@@ -3037,8 +3037,8 @@ struct coord_series_struct
 };
 
 void* raa_prep_coordinates(raa_db_access* raa_current_db, int lrank, int seqnum,
-                           char* operation, /* "simple","fragment","feature","region" */
-                           char* feature_name, char* bounds, char* min_bounds)
+    char* operation, /* "simple","fragment","feature","region" */
+    char* feature_name, char* bounds, char* min_bounds)
 /*
    only one of lrank and seqnum is != 0 to work on a sequence list or on an individual sequence
    feature_name: used for operations feature and region, NULL otherwise
@@ -3058,9 +3058,9 @@ void* raa_prep_coordinates(raa_db_access* raa_current_db, int lrank, int seqnum,
   struct coord_series_struct* retval;
 
   sprintf(message, "extractseqs&%s=%d&format=coordinates&operation=%s",
-          seqnum == 0 ? "lrank" : "seqnum",
-          seqnum == 0 ? lrank : seqnum,
-          operation);
+      seqnum == 0 ? "lrank" : "seqnum",
+      seqnum == 0 ? lrank : seqnum,
+      operation);
   sock_fputs(raa_current_db, message);
   if (strcmp(operation, "feature") == 0 || strcmp(operation, "region") == 0)
   {
@@ -3379,8 +3379,8 @@ static void raa_calc_taxo_count(raa_node* racine)
 
 
 int raa_loadtaxonomy(raa_db_access* raa_current_db, char* rootname,
-                     int (* progress_function)(int, void*), void* progress_arg,
-                     int (* need_interrupt_f)(void*), void* interrupt_arg)
+    int (* progress_function)(int, void*), void* progress_arg,
+    int (* need_interrupt_f)(void*), void* interrupt_arg)
 /* charge la taxo complete dans raa_current_db->sp_tree et rend 0 ssi OK */
 {
   int totspec, i, maxtid;
@@ -3486,7 +3486,7 @@ int raa_loadtaxonomy(raa_db_access* raa_current_db, char* rootname,
       {
         if (tab_noeud[i] != NULL && tab_noeud[i]->tid != 0)
           raa_current_db->tid_to_rank[tab_noeud[i]->tid] =
-            tab_noeud[i]->rank;
+              tab_noeud[i]->rank;
       }
     }
     raa_current_db->sp_tree = tab_noeud;
@@ -3496,7 +3496,7 @@ int raa_loadtaxonomy(raa_db_access* raa_current_db, char* rootname,
 
 
 char* raa_get_taxon_info(raa_db_access* raa_current_db, char* name, int rank, int tid, int* p_rank,
-                         int* p_tid, int* p_parent, struct raa_pair** p_desc_list)
+    int* p_tid, int* p_parent, struct raa_pair** p_desc_list)
 /*
    from a taxon identified by its name or, if name is NULL, by its rank or, if rank is 0, by its taxon ID (tid)
    computes :
@@ -3546,7 +3546,7 @@ char* raa_get_taxon_info(raa_db_access* raa_current_db, char* name, int rank, in
     *p_tid = raa_current_db->sp_tree[rank]->tid;
   if (p_parent != NULL)
     *p_parent = ( raa_current_db->sp_tree[rank]->parent != NULL ?
-                  raa_current_db->sp_tree[rank]->parent->rank : 0);
+        raa_current_db->sp_tree[rank]->parent->rank : 0);
   if (p_desc_list != NULL)
     *p_desc_list = raa_current_db->sp_tree[rank]->list_desc;
   return raa_current_db->sp_tree[rank]->name;
@@ -3554,7 +3554,7 @@ char* raa_get_taxon_info(raa_db_access* raa_current_db, char* name, int rank, in
 
 
 static char* raa_getattributes_both(raa_db_access* raa_current_db, const char* id, int rank,
-                                    int* prank, int* plength, int* pframe, int* pgc, char** pacc, char** pdesc, char** pspecies, char** pseq)
+    int* prank, int* plength, int* pframe, int* pgc, char** pacc, char** pdesc, char** pspecies, char** pseq)
 /*
    for a sequence identified by name or acc. no. (id != NULL) or by rank
    returns rank, name, accession, length, frame, acnuc genetic code ID,
@@ -3663,14 +3663,14 @@ static char* raa_getattributes_both(raa_db_access* raa_current_db, const char* i
 
 
 char* raa_getattributes(raa_db_access* raa_current_db, const char* id,
-                        int* prank, int* plength, int* pframe, int* pgc, char** pacc, char** pdesc, char** pspecies, char** pseq)
+    int* prank, int* plength, int* pframe, int* pgc, char** pacc, char** pdesc, char** pspecies, char** pseq)
 {
   return raa_getattributes_both(raa_current_db, id, 0, prank, plength, pframe, pgc, pacc, pdesc, pspecies, pseq);
 }
 
 
 char* raa_seqrank_attributes(raa_db_access* raa_current_db, int rank,
-                             int* plength, int* pframe, int* pgc, char** pacc, char** pdesc, char** pspecies, char** pseq)
+    int* plength, int* pframe, int* pgc, char** pacc, char** pdesc, char** pspecies, char** pseq)
 {
   return raa_getattributes_both(raa_current_db, NULL, rank, NULL, plength, pframe, pgc, pacc, pdesc, pspecies, pseq);
 }

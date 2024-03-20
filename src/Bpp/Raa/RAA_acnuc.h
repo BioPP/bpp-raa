@@ -190,10 +190,10 @@ extern int raa_gfrag(raa_db_access* raa_current_db, int nsub, int first, int lfr
 extern void raa_acnucclose(raa_db_access* raa_current_db);
 extern int raa_prep_acnuc_query(raa_db_access* raa_current_db);
 extern int raa_proc_query(raa_db_access* raa_current_db, char* query, char** message, char* nomliste, int* numlist,
-                          int* count, int* locus, int* type);
+    int* count, int* locus, int* type);
 int raa_nexteltinlist(raa_db_access* raa_current_db, int first, int lrank, char** pname, int* plength);
 int raa_nexteltinlist_annots(raa_db_access* raa_current_db, int first, int lrank, char** pname, int* plength,
-                             raa_long* paddr, int* pdiv);
+    raa_long* paddr, int* pdiv);
 raa_long scan_raa_long(char* txt);
 int raa_seq_to_annots(raa_db_access* raa_current_db, int numseq, raa_long* faddr, int* div);
 char* print_raa_long(raa_long val, char* buffer);
@@ -221,11 +221,11 @@ int raa_alllistranks(raa_db_access* raa_current_db, int** pranks);
 int raa_fcode(raa_db_access* raa_current_db, raa_file cas, char* name);
 int raa_read_first_rec(raa_db_access* raa_current_db, raa_file cas);
 char* raa_readsub(raa_db_access* raa_current_db, int num, int* plength, int* ptype, int* pext, int* plkey, int* plocus,
-                  int* pframe, int* pgencode);
+    int* pframe, int* pgencode);
 char* raa_readsub_pannots(raa_db_access* raa_current_db, int num, int* plength, int* ptype, int* pext, int* plkey, int* plocus,
-                          int* pframe, int* pgencode, raa_long* paddr, int* pdiv);
+    int* pframe, int* pgencode, raa_long* paddr, int* pdiv);
 char* raa_readloc(raa_db_access* raa_current_db, int num, int* sub, int* pnuc, int* spec, int* host, int* plref,
-                  int* molec, int* placc, int* org);
+    int* molec, int* placc, int* org);
 char* raa_readspec(raa_db_access* raa_current_db, int num, char** plibel, int* plsub, int* desc, int* syno, int* plhost);
 char* raa_readkey(raa_db_access* raa_current_db, int num, char** plibel, int* plsub, int* desc, int* syno);
 char* raa_readsmj(raa_db_access* raa_current_db, int num, char** plibel, int* plong);
@@ -238,26 +238,26 @@ char* raa_ghelp(raa_db_access* raa_current_db, char* fname, char* topic);
 int raa_nextmatchkey(raa_db_access* raa_current_db, int num, char* pattern, char** matching);
 int raa_savelist(raa_db_access* raa_current_db, int lrank, FILE* out, int use_acc, char* prefix);
 int raa_modifylist(raa_db_access* raa_current_db, int lrank, char* type /* "length" or "date" */, char* operation /* ">2000" */,
-                   int* pnewlrank, int (* check_interrupt)(void), int* p_processed);
+    int* pnewlrank, int (* check_interrupt)(void), int* p_processed);
 int raa_knowndbs(raa_db_access* raa_current_db, char*** pnames, char*** pdescriptions);
 char* raa_short_descr(raa_db_access* raa_current_db, int seqnum, char* text, int maxlen, raa_long pinf, int div, char* name);
 void* raa_prep_extract(raa_db_access* raa_current_db, char* format, FILE* outstream, char* choix,
-                       char* feature_name, char* bornes, char* min_bornes, char** message, int lrank);
+    char* feature_name, char* bornes, char* min_bornes, char** message, int lrank);
 int raa_extract_1_seq(void* opaque);
 int raa_extract_interrupt(raa_db_access* raa_current_db, void* opaque);
 void* raa_prep_coordinates(raa_db_access* raa_current_db, int lrank, int seqnum,
-                           char* operation, /* "simple","fragment","feature","region" */
-                           char* feature_name, char* bounds, char* min_bounds);
+    char* operation, /* "simple","fragment","feature","region" */
+    char* feature_name, char* bounds, char* min_bounds);
 int* raa_1_coordinate_set(void*);
 int raa_loadtaxonomy(raa_db_access* raa_current_db, char* rootname,
-                     int (* progress_function)(int, void*), void* progress_arg,
-                     int (* need_interrupt_f)(void*), void* interrupt_arg);
+    int (* progress_function)(int, void*), void* progress_arg,
+    int (* need_interrupt_f)(void*), void* interrupt_arg);
 char* raa_get_taxon_info(raa_db_access* raa_current_db, char* name, int rank, int tid, int* p_rank,
-                         int* p_tid, int* p_parent, struct raa_pair** p_desc_list);
+    int* p_tid, int* p_parent, struct raa_pair** p_desc_list);
 char* raa_getattributes(raa_db_access* raa_current_db, const char* id,
-                        int* prank, int* plength, int* pframe, int* pgc, char** pacc, char** pdesc, char** pspecies, char** pseq);
+    int* prank, int* plength, int* pframe, int* pgc, char** pacc, char** pdesc, char** pspecies, char** pseq);
 char* raa_seqrank_attributes(raa_db_access* raa_current_db, int rank,
-                             int* plength, int* pframe, int* pgc, char** pacc, char** pdesc, char** pspecies, char** pseq);
+    int* plength, int* pframe, int* pgc, char** pacc, char** pdesc, char** pspecies, char** pseq);
 
 int sock_fputs(raa_db_access* raa_current_db, const char* line);
 int sock_flush(raa_db_access* raa_current_db);
@@ -271,4 +271,4 @@ void compact(char* chaine);
 int strcmptrail(char* s1, int l1, char* s2, int l2);
 
 
-#endif/* RAA_ACNUC_H  */
+#endif /* RAA_ACNUC_H  */

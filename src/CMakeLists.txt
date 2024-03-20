@@ -2,13 +2,6 @@
 #
 # SPDX-License-Identifier: CECILL-2.1
 
-# CMake script for Bio++ Remote Acnuc Access
-# Authors:
-#   Sylvain Gaillard
-#   Julien Dutheil
-#   Francois Gindraud (2017)
-# Created: 11/09/2009
-
 set (C_FILES
   Bpp/Raa/RAA_acnuc.c
   Bpp/Raa/md5.c

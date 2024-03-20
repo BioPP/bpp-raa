@@ -104,7 +104,7 @@ static void MD5_Update(struct MD5Context* ctx, unsigned const char* buf, unsigne
 
   t = ctx->bits[0];
   if ((ctx->bits[0] = t + ((uint32) len << 3)) < t)
-    ctx->bits[1]++;                       /* Carry from low to high */
+    ctx->bits[1]++; /* Carry from low to high */
   ctx->bits[1] += len >> 29;
 
   t = (t >> 3) & 0x3f;  /* Bytes already in shsInfo->data */
@@ -208,7 +208,7 @@ static void MD5_Final(unsigned char digest[16], struct MD5Context* ctx)
 
 /* This is the central step in the MD5 algorithm. */
 #define MD5STEP(f, w, x, y, z, data, s) \
-  ( w += f(x, y, z) + data,  w = w << s | w >> (32 - s),  w += x )
+        ( w += f(x, y, z) + data,  w = w << s | w >> (32 - s),  w += x )
 
 /*
  * The core of the MD5 algorithm, this alters an existing MD5 hash to

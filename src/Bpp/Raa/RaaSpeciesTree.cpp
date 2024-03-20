@@ -99,7 +99,7 @@ int RaaSpeciesTree::firstChild(int rank)
 int RaaSpeciesTree::nextChild(int rank, int child)
 {
   if (!(rank >= 2 && rank <= max_sp && child > 2 && child <= max_sp && sp_tree[rank] != NULL &&
-        sp_tree[child] != NULL))
+      sp_tree[child] != NULL))
     return 0;
   struct raa_pair* pair = sp_tree[rank]->list_desc;
   while (pair != NULL && pair->value->rank != child)

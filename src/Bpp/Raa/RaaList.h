@@ -153,4 +153,4 @@ private:
 };
 } // end of namespace bpp.
 
-#endif// _RAALIST_H_
+#endif // _RAALIST_H_

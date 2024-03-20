@@ -508,4 +508,4 @@ private:
 };
 } // end of namespace bpp.
 
-#endif// _RAA_H_
+#endif // _RAA_H_

@@ -57,10 +57,10 @@ unique_ptr<Sequence> RAA::getSeq_both(const string& name_or_accno, int rank, int
   char* name, * description;
   if (rank == 0)
     name = raa_getattributes(raa_data, name_or_accno.c_str(), &rank, &length, NULL, NULL, NULL,
-                             &description, NULL, NULL);
+          &description, NULL, NULL);
   else
     name = raa_seqrank_attributes(raa_data, rank, &length, NULL, NULL, NULL,
-                                  &description, NULL, NULL);
+          &description, NULL, NULL);
   if (length > maxlength)
     return NULL;
   string sname = name;
@@ -129,7 +129,7 @@ unique_ptr<RaaSeqAttributes> RAA::getAttributes(const string& name_or_accno)
   char* description, * species, * access;
   int acnuc_gc, rank, length, frame;
   char* name = raa_getattributes(this->raa_data, name_or_accno.c_str(), &rank, &length,
-                                 &frame, &acnuc_gc, &access, &description, &species, NULL);
+        &frame, &acnuc_gc, &access, &description, &species, NULL);
   if (!name)
   {
     return nullptr;
@@ -156,7 +156,7 @@ unique_ptr<RaaSeqAttributes> RAA::getAttributes(int seqrank)
     return nullptr;
   auto myattr = make_unique<RaaSeqAttributes>();
   char* name = raa_seqrank_attributes(this->raa_data, seqrank, &myattr->length,
-                                      &myattr->frame, &acnuc_gc, &access, &description, &species, NULL);
+        &myattr->frame, &acnuc_gc, &access, &description, &species, NULL);
   if (!name)
     return nullptr;
   myattr->rank = seqrank;
@@ -305,14 +305,14 @@ unique_ptr<RaaList> RAA::processQuery(const string& query, const string& listnam
   char* message;
   int type, rank;
   int err = raa_proc_query(raa_data, (char*)query.c_str(), &message, (char*)listname.c_str(), &rank, NULL,
-                           NULL, &type);
+        NULL, &type);
   if (err)
   {
     string errmess = message;
     free(message);
     throw errmess;
   }
-  unique_ptr<RaaList> mylist(new RaaList()); //Note: cannot use make_unique because of private constructor.
+  unique_ptr<RaaList> mylist(new RaaList()); // Note: cannot use make_unique because of private constructor.
   mylist->myraa = this;
   mylist->rank = rank;
   mylist->name = listname;
@@ -350,7 +350,7 @@ unique_ptr<RaaList> RAA::createEmptyList(const string& listname, const string& k
     type = 'E';
   sock_printf(raa_data, "setliststate&lrank=%d&type=%c\n", lrank, type);
   read_sock(raa_data);
-  unique_ptr<RaaList> mylist(new RaaList()); //Note: cannot use make_unique because of private constructor.
+  unique_ptr<RaaList> mylist(new RaaList()); // Note: cannot use make_unique because of private constructor.
   mylist->myraa = this;
   mylist->rank = lrank;
   mylist->name = listname;
@@ -532,7 +532,7 @@ unique_ptr<RaaList> RAA::getDirectFeature(const string& seqname, const string& f
     return nullptr;
   }
   raa_setlistname(raa_data, matchinglist, (char*)listname.c_str());
-  unique_ptr<RaaList> list2(new RaaList()); //Note: cannot use make_unique because of private constructor.
+  unique_ptr<RaaList> list2(new RaaList()); // Note: cannot use make_unique because of private constructor.
   list2->rank = matchinglist;
   list2->myraa = this;
   list2->name = listname;
