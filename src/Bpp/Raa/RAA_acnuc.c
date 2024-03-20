@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: The Bio++ Development Group
+//
+// SPDX-License-Identifier: CECILL-2.1
+
 #include "RAA_acnuc.h"
 #include "parser.h"
 
@@ -354,7 +358,7 @@ int raa_open_socket(const char* serveurName, int port, const char* clientid, raa
   raa_current_db = (raa_db_access*)calloc(1, sizeof(raa_db_access));
   if (raa_current_db == NULL)
     return nomemory;                        /* not enough memory */
-  /* création de la socket */
+  /* creation de la socket */
 #ifdef WIN32
   err = WSAStartup(MAKEWORD(2, 2), &mywsadata); /* indispensable avant utilisation socket */
   if (err == 0)
@@ -372,7 +376,7 @@ int raa_open_socket(const char* serveurName, int port, const char* clientid, raa
     return cantopensocket;
   }
 #endif
-/* création de deux flux type FILE * */
+/* creation de deux flux type FILE * */
 #if defined(WIN32)
   raa_current_db->raa_sockfdr = (FILE*)raa_snum;
   raa_current_db->raa_sockfdw = (FILE*)raa_snum;
@@ -1089,7 +1093,7 @@ char* print_raa_long(raa_long val, char* buffer)
 
 
 static char* load_annots_buf(raa_db_access* raa_current_db, raa_long faddr, int div, int was_nextannots)
-/* appeler juste après avoir envoye sur socket
+/* appeler juste apres avoir envoye sur socket
    read_annots&... ou  next_annots&... :
    retour attendu sur socket : nl=xx[&offset=xx]&...nl lines each with \n     */
 {

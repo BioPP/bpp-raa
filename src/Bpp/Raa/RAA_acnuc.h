@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: The Bio++ Development Group
+//
+// SPDX-License-Identifier: CECILL-2.1
+
 #ifndef RAA_ACNUC_H
 #define RAA_ACNUC_H
 

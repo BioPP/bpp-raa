@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: The Bio++ Development Group
+//
+// SPDX-License-Identifier: CECILL-2.1
+
 #include "RaaSpeciesTree.h"
 #include <string>
 using namespace std;

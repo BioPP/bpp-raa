@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: The Bio++ Development Group
+//
+// SPDX-License-Identifier: CECILL-2.1
+
 #ifndef _RAASPECIESTREE_H_
 #define _RAASPECIESTREE_H_
 

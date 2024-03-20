@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: The Bio++ Development Group
+//
+// SPDX-License-Identifier: CECILL-2.1
+
 #ifndef _RAALIST_H_
 #define _RAALIST_H_
 #include <string>

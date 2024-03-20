@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: The Bio++ Development Group
+//
+// SPDX-License-Identifier: CECILL-2.1
+
 /* functions to handle zlib-compressed data read from socket
  */
 #include <zlib.h>

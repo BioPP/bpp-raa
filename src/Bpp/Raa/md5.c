@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: The Bio++ Development Group
+//
+// SPDX-License-Identifier: CECILL-2.1
+
 /*
  * $Id: md5.c,v 1.1.1.1 2009-06-24 14:37:29 jdutheil Exp $
  *

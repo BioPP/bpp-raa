@@ -1,9 +1,13 @@
+// SPDX-FileCopyrightText: The Bio++ Development Group
+//
+// SPDX-License-Identifier: CECILL-2.1
+
 #include "parser.h"
 
 char* unprotect_quotes(char* name);
 
 
-/** initialisation d'une réponse **/
+/** initialisation d'une reponse **/
 Reponse* initreponse(void)
 {
   Reponse* rep;
