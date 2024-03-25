@@ -6,8 +6,8 @@ cmake_minimum_required (VERSION 3.5)
 project (bpp-raa3 C CXX)
 
 # Compile options
-set (CMAKE_CXX_FLAGS "-std=c++14 -Wall")
-set (CMAKE_C_FLAGS "-Wall")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+add_compile_options(-Wall)
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
