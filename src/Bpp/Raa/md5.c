@@ -49,7 +49,7 @@ struct MD5Context
   int doByteReverse;
 };
 
-static void MD5_Transform(uint32* buf, uint32 const* in);
+static void MD5_Transform(uint32 buf[4], uint32 const in[16]);
 
 static void byteReverse(unsigned char* buf, unsigned longs);
 
