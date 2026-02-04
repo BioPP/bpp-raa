@@ -51,7 +51,7 @@ else(NO_DEP_CHECK)
     #           library implements.
     # In other words, the library implements all the interface numbers in the
     # range from number current - age to current.
-    set(${PROJECT_NAME}_VERSION_CURRENT "3")
+    set(${PROJECT_NAME}_VERSION_CURRENT "5")
     set(${PROJECT_NAME}_VERSION_REVISION "0")
     set(${PROJECT_NAME}_VERSION_AGE "0")
 
@@ -88,7 +88,7 @@ else(NO_DEP_CHECK)
     endif(CMAKE_INSTALL_PREFIX)
 
     include(GNUInstallDirs)
-    find_package(bpp-seq 3.0.0 REQUIRED)
+    find_package(bpp-seq 14.0.0 REQUIRED)
 
     # Find the zlib installation (define zlib imported target)
     find_package(ZLIB REQUIRED)
